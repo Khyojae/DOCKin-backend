@@ -13,7 +13,7 @@ CREATE TABLE users (
                        user_id VARCHAR(50) PRIMARY KEY, -- String PK (사번)
                        name VARCHAR(10) NOT NULL,
                        password VARCHAR(256) NOT NULL,
-                       role VARCHAR(50) NOT NULL,
+                       type ENUM('ADMIN','USER'),
                        language_code VARCHAR(10) DEFAULT 'ko',
                        tts_enabled BOOLEAN DEFAULT TRUE,
                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
