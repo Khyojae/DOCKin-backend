@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name="work_logs")
-public class work_logs {
+@Table(name="Work_logs")
+public class Work_logs {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long log_id;
