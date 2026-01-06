@@ -1,17 +1,16 @@
 package com.DOCKin.dto;
 
+import com.DOCKin.model.UserRole;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-//멤버조회 Dto
-public class MemberDto {
+public class CustomUserInfoDto extends MemberDto{
     private String userId;
     private String name;
     private String password;
+    private UserRole role;
 }
