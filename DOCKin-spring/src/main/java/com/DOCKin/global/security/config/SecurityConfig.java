@@ -33,7 +33,10 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/webjars/**",
             "/member/login",
-            "/member/signup"};
+            "/member/signup",
+            "/api/safety/**",
+            "/api/work-logs/**",
+            "/api/attendance/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

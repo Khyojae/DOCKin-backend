@@ -3,6 +3,7 @@ package com.DOCKin.controller;
 import com.DOCKin.dto.WorkLogsCreateRequestDto;
 import com.DOCKin.dto.WorkLogsUpdateRequestDto;
 import com.DOCKin.dto.Work_logsDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name="작업일지 CRUD",description = "작업일지 CRUD가 가능함")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/work-logs")
