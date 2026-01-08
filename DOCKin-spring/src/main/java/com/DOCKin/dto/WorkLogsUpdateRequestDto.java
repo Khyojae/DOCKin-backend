@@ -11,6 +11,6 @@ import java.time.LocalDateTime;
 public class WorkLogsUpdateRequestDto {
     private String title;
     private String log_text;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    //private LocalDateTime createdAt;
+    //private LocalDateTime updatedAt;
 }

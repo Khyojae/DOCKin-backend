@@ -1,12 +1,11 @@
 package com.DOCKin.controller;
 
 import com.DOCKin.dto.AttendanceDto;
+import com.DOCKin.dto.ClockInRequestDto;
+import com.DOCKin.dto.ClockOutRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,14 +15,14 @@ import java.util.List;
 public class AttendanceController {
     //Clockin(출근 API)
     @PostMapping("/in")
-    public ResponseEntity<AttendanceDto>ClockIn(){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AttendanceDto>ClockIn(@RequestBody ClockInRequestDto request){
+        return ResponseEntity.ok(new AttendanceDto());
     }
 
     //Clockout(퇴근 API)
     @PostMapping("/out")
-    public ResponseEntity<AttendanceDto>ClockOut(){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AttendanceDto>ClockOut(@RequestBody ClockOutRequestDto request){
+        return ResponseEntity.ok(new AttendanceDto());
     }
 
     //개인 근태 기록 조회 API

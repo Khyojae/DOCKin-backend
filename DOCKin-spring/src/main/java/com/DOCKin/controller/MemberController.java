@@ -26,8 +26,7 @@ public class MemberController {
     //로그인
     @PostMapping("/login")
     public ResponseEntity<String> getMemberProfile(
-            @Valid @RequestBody LoginRequestDto request
-            ){
+            @Valid @RequestBody LoginRequestDto request){
         String token = memberService.login(request);
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }

@@ -15,6 +15,6 @@ public class WorkLogsCreateRequestDto {
 
     private Long equipmentId;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    //private LocalDateTime createdAt;
+    //private LocalDateTime updatedAt;
 }
