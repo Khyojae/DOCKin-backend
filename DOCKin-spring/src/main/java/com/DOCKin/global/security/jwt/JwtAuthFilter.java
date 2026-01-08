@@ -13,35 +13,43 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
+//jwt gate
+//보통 OncePerRequestFilter을 상속
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
 
+
     @Override
-    protected void doFilterInternal(final HttpServletRequest request,
-                                    final HttpServletResponse response,
-                                    final FilterChain filterChain) throws ServletException, IOException{
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         String authorizationHeader = request.getHeader("Authorization");
 
-        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
 
-            if(jwtUtil.isValidToken(token)){
+            if (jwtUtil.isValidToken(token)) {
                 Long userId = jwtUtil.getUserId(token);
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(
-                        userId.toString());
-                if(userDetails!=null) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+                UserDetails userDetails =
+                        customUserDetailsService.loadUserByUsername(userId.toString());
 
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(usernamePasswordAuthenticationToken);
-            }
-            }
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-    }
-		filterChain.doFilter(request, response);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        }
+
+        filterChain.doFilter(request, response);
     }
 }

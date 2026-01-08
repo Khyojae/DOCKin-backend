@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import com.DOCKin.dto.ErrorResponseDto;
+//로그인은 했는데 권한이 없을때
 @Slf4j(topic ="Forbidden_EXCEPTION_HANDLER")
 @AllArgsConstructor
 @Component
@@ -23,15 +24,16 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(final HttpServletRequest request, final HttpServletResponse response,
                        final AccessDeniedException accessDeniedException) throws IOException, ServletException {
-       log.error("NO Authorities",accessDeniedException);
-       ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.FORBIDDEN.value(),
-               accessDeniedException.getMessage(),
-               LocalDateTime.now());
+        log.error("NO Authorities", accessDeniedException);
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                HttpStatus.FORBIDDEN.value(),
+                "Access Denied: 권한이 부족합니다.",
+                LocalDateTime.now());
 
-       String responseBody = objectMapper.writeValueAsString(errorResponseDto);
-       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-       response.setStatus(HttpStatus.UNAUTHORIZED.value());
-       response.setCharacterEncoding("UTF-8");
-       response.getWriter().write(responseBody);
+        String responseBody = objectMapper.writeValueAsString(errorResponseDto);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(responseBody);
     }
 }

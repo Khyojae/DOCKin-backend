@@ -2,6 +2,7 @@ package com.DOCKin.service;
 
 import com.DOCKin.dto.CustomUserInfoDto;
 import com.DOCKin.dto.LoginRequestDto;
+import com.DOCKin.dto.MemberRequestDto;
 import com.DOCKin.global.error.ValidateMemberException;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member;
@@ -27,7 +28,7 @@ public class MemberService{
 
     @Transactional
     public String login(LoginRequestDto dto){
-        String email = dto.getUserId();
+        String userId = dto.getUserId();
         String password = dto.getPassword();
         Optional<Member> member = memberRepository.findByUserId(dto.getUserId());
     if(member.isEmpty()){
@@ -41,14 +42,21 @@ public class MemberService{
     }
 
     @Transactional
-    public String signup(Member member){
-        Optional<Member> validMember = memberRepository.findByUserId(member.getUserId());
-
-        if(validMember.isPresent()){
-            throw new ValidateMemberException("this member email is already exist. " + member.getUserId());
-    }
-        member.updatePassword(encoder.encode(member.getPassword()));
+    public String signup(MemberRequestDto dto) {
+        if(memberRepository.existsById(dto.getUserId())) {
+            throw new ValidateMemberException("이미 존재하는 사번입니다: " + dto.getUserId());
+        }
+        Member member = Member.builder()
+                .userId(dto.getUserId())
+                .name(dto.getName())
+                .password(encoder.encode(dto.getPassword()))
+                .role(dto.getRole())
+                .language_code(dto.getLanguage_code())
+                .tts_enabled(dto.getTts_enabled())
+                .shipYardArea(dto.getShipYardArea())
+                .build();
         memberRepository.save(member);
-        return  member.getUserId();
-}
+
+        return member.getUserId();
+    }
 }

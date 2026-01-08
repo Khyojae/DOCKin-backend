@@ -7,13 +7,32 @@
 -- 채팅방
 -- 긴급 연락처
 -- 안전 관리
+SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS safety_enrollments;
+DROP TABLE IF EXISTS safety_courses;
+DROP TABLE IF EXISTS emergency_contacts;
+DROP TABLE IF EXISTS chat_messages;
+DROP TABLE IF EXISTS chat_members;
+DROP TABLE IF EXISTS chat_rooms;
+DROP TABLE IF EXISTS absence_requests;
+DROP TABLE IF EXISTS attendance;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS checklist_results;
+DROP TABLE IF EXISTS checklist_items;
+DROP TABLE IF EXISTS checklists;
+DROP TABLE IF EXISTS work_logs;
+DROP TABLE IF EXISTS equipment;
+DROP TABLE IF EXISTS Authority;
+DROP TABLE IF EXISTS users;
+
+SET FOREIGN_KEY_CHECKS = 1;
 -- 1. 사용자
 CREATE TABLE users (
                        user_id VARCHAR(50) PRIMARY KEY, -- String PK (사번)
                        name VARCHAR(10) NOT NULL,
                        password VARCHAR(256) NOT NULL,
-                       type ENUM('ADMIN','USER'),
+                       role ENUM('ADMIN','USER'),
                        language_code VARCHAR(10) DEFAULT 'ko',
                        tts_enabled BOOLEAN DEFAULT TRUE,
                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -55,7 +74,7 @@ CREATE TABLE checklists (
                             checklist_id INT PRIMARY KEY AUTO_INCREMENT,
                             equipment_id INT NOT NULL,
                             title VARCHAR(100) NOT NULL,
-                            type ENUM('pre', 'post'), -- 작업 전/후
+                            role ENUM('pre', 'post'), -- 작업 전/후
                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                             FOREIGN KEY (equipment_id) REFERENCES equipment(equipment_id)
@@ -101,7 +120,7 @@ CREATE TABLE attendance (
                             clock_in_time DATETIME NOT NULL,
                             clock_out_time DATETIME, -- 퇴근 시간 (nullable)
                             work_date DATE NOT NULL,
-                            type ENUM('NORMAL','LATE','ABSENT','VACATION','SICK'),
+                            role ENUM('NORMAL','LATE','ABSENT','VACATION','SICK'),
                             in_location VARCHAR(255),    -- 출근 시 위치/리더기 정보
                             out_location VARCHAR(255),   -- 퇴근 시 위치/리더기 정보
                             CONSTRAINT fk_attendance_member
