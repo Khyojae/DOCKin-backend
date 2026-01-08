@@ -1,1 +1,33 @@
-services: {}
+version: '3.8'
+
+services:
+  dockin-nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - dockin-app
+
+  dockin-app:
+    build: .
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://DOCKin-DB:3306/Dockin?serverTimezone=Asia/Seoul
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=1234
+    depends_on:
+      - DOCKin-DB
+
+  DOCKin-DB:
+    image: mysql:8.0.44
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_DATABASE: "Dockin"
+    ports:
+      - "3306:3306"
+    volumes:
+      - dockin_db_data:/var/lib/mysql
+
+volumes:
+  dockin_db_data:
