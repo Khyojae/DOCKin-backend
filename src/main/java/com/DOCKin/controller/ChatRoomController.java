@@ -1,9 +1,6 @@
 package com.DOCKin.controller;
 
-import com.DOCKin.dto.chat.ChatMessageResponseDto;
-import com.DOCKin.dto.chat.ChatRoomRequestDto;
-import com.DOCKin.dto.chat.ChatRoomResponseDto;
-import com.DOCKin.dto.chat.ChatRoomUpdateRequestDto;
+import com.DOCKin.dto.chat.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Getter;
@@ -14,14 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
-@Tag(name="Chat Room", description = "채팅방 관리")
+@Tag(name="채팅방 관리", description = "채팅방 관리")
 @RestController
 @RequestMapping("api/chat")
 @RequiredArgsConstructor
 public class ChatRoomController {
     @Operation(summary="채팅방 생성", description = "새로운 채팅방을 생성함")
     @PostMapping("/room")
-    public ResponseEntity<ChatRoomRequestDto> createRoom(@RequestParam String name){
+    public ResponseEntity<ChatRoomRequestDto> createRoom(@RequestBody ChatRoomRequestDto chatRoomRequestDto){
         ChatRoomRequestDto room = new ChatRoomRequestDto();
         return ResponseEntity.ok(new ChatRoomRequestDto());
     }
@@ -57,4 +54,12 @@ public class ChatRoomController {
     public ResponseEntity<List<ChatMessageResponseDto>> getChatMessages(@PathVariable String roomId){
         return ResponseEntity.ok(Collections.emptyList());
     }
+
+    @Operation(summary="메시지 보내기",description="메시지는 전역번호로")
+    @PostMapping("/room/{roomId}/message")
+    public ResponseEntity<ChatMessageRequestDto> createMessage(@PathVariable String roomId,
+                                                               @RequestBody ChatMessageRequestDto requestDto){
+        return ResponseEntity.ok(null);
+    }
+
 }

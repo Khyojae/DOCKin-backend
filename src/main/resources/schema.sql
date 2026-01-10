@@ -7,6 +7,7 @@
 -- 채팅방
 -- 긴급 연락처
 -- 안전 관리
+-- refresh_token
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS safety_enrollments;
@@ -25,6 +26,8 @@ DROP TABLE IF EXISTS work_logs;
 DROP TABLE IF EXISTS equipment;
 DROP TABLE IF EXISTS Authority;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS refresh_token;
+
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- 1. 사용자
@@ -212,3 +215,9 @@ CREATE TABLE safety_enrollments (
                                     UNIQUE KEY uk_user_course (user_id, course_id)
 );
 
+--17. refresh_token
+CREATE TABLE refresh_token (
+                               user_id VARCHAR(255) NOT NULL,
+                               token VARCHAR(512) NOT NULL, -- JWT는 길기 때문에 길이를 충분히 줍니다.
+                               PRIMARY KEY (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

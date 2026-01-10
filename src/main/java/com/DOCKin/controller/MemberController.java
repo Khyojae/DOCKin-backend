@@ -2,6 +2,7 @@ package com.DOCKin.controller;
 
 import com.DOCKin.dto.Member.LoginRequestDto;
 import com.DOCKin.dto.Member.MemberRequestDto;
+import com.DOCKin.repository.RefreshTokenRepository;
 import com.DOCKin.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,8 +38,9 @@ public class MemberController {
         }
 
     @Operation(summary="회원탈퇴", description = "회원탈퇴를 할 수 있음")
-    @DeleteMapping("/{logId}")
-    public ResponseEntity<String> DeleteMember(@PathVariable("logId") Long logId){
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteMember(@PathVariable("userId") String userId){
+        memberService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
     }
 

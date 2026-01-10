@@ -3,10 +3,14 @@ package com.DOCKin.service;
 import com.DOCKin.dto.Member.CustomUserInfoDto;
 import com.DOCKin.dto.Member.LoginRequestDto;
 import com.DOCKin.dto.Member.MemberRequestDto;
+import com.DOCKin.global.error.BusinessException;
+import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.global.error.ValidateMemberException;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.repository.MemberRepository;
+import com.DOCKin.repository.RefreshTokenRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,9 +27,11 @@ import java.util.Optional;
 public class MemberService{
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder encoder;
     private final ModelMapper modelMapper;
 
+    //로그인 로직
     @Transactional
     public String login(LoginRequestDto dto){
         String userId = dto.getUserId();
@@ -41,6 +47,7 @@ public class MemberService{
     return jwtUtil.createAccessToken(info);
     }
 
+    //회원가입 로직
     @Transactional
     public String signup(MemberRequestDto dto) {
         if(memberRepository.existsById(dto.getUserId())) {
@@ -58,5 +65,14 @@ public class MemberService{
         memberRepository.save(member);
 
         return member.getUserId();
+    }
+
+    //회원탈퇴 로직
+    @Transactional
+    public void deleteAccount(String userId){
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        memberRepository.delete(member);
+        refreshTokenRepository.deleteByUserId(userId);
     }
 }
