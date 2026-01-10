@@ -3,6 +3,8 @@ package com.DOCKin.service;
 import com.DOCKin.dto.Member.CustomUserInfoDto;
 import com.DOCKin.dto.Member.LoginRequestDto;
 import com.DOCKin.dto.Member.MemberRequestDto;
+import com.DOCKin.global.error.BusinessException;
+import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.global.error.ValidateMemberException;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
@@ -69,7 +71,7 @@ public class MemberService{
     @Transactional
     public void deleteAccount(String userId){
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(()->new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
         memberRepository.delete(member);
         refreshTokenRepository.deleteByUserId(userId);
     }
