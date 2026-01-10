@@ -49,8 +49,8 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/dockin-app:latest
 
             # 3. 서비스 업데이트
-            # 파일명이 compose.yaml이므로 -f 옵션으로 파일명을 지정합니다.
-            sudo docker compose -f compose.yaml up -d --no-deps dockin-app
+            # -f 옵션을 제거하여 자동 인식을 유도하고, 안정적인 docker-compose 명령어를 사용합니다.
+            sudo docker-compose up -d --no-deps dockin-app
 
-            # 4. 미사용 이미지 정리
+            # 4. 사용하지 않는 옛날 이미지 정리
             sudo docker image prune -f
