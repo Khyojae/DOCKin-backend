@@ -7,6 +7,7 @@ import com.DOCKin.global.error.ValidateMemberException;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.repository.MemberRepository;
+import com.DOCKin.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class MemberService{
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder encoder;
     private final ModelMapper modelMapper;
 
@@ -69,5 +71,6 @@ public class MemberService{
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new IllegalArgumentException("회원을 찾을 수 없습니다."));
         memberRepository.delete(member);
+        refreshTokenRepository.deleteByUserId(userId);
     }
 }

@@ -2,6 +2,7 @@ package com.DOCKin.controller;
 
 import com.DOCKin.dto.Member.LoginRequestDto;
 import com.DOCKin.dto.Member.MemberRequestDto;
+import com.DOCKin.repository.RefreshTokenRepository;
 import com.DOCKin.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
