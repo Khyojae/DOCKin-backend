@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class WorkLogsCreateRequestDto {
     private String title;
     private String log_text;
-
+    private String image_url;
     private Long equipmentId;
 
     //private LocalDateTime createdAt;

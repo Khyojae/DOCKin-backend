@@ -63,6 +63,7 @@ CREATE TABLE work_logs (
                            title VARCHAR(256) NOT NULL,
                            equipment_id INT,
                            log_text TEXT NOT NULL,
+                           image_url VARCHAR(255),
                            audio_file_url VARCHAR(255),
                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -171,6 +172,8 @@ CREATE TABLE chat_messages (
                                room_id INT NOT NULL,
                                sender_id VARCHAR(50) NOT NULL,
                                content TEXT NOT NULL,
+                               message_type ENUM('TEXT','IMAGE','FILE') DEFAULT 'TEXT',
+                               file_url VARCHAR(255),
                                sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                FOREIGN KEY (room_id) REFERENCES chat_rooms(room_id) ON DELETE CASCADE,
                                INDEX idx_room_sent (room_id,sent_at)

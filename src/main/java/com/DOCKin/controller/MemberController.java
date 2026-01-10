@@ -39,10 +39,11 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(id);
         }
 
-        @DeleteMapping("/{logId}")
-        public ResponseEntity<String> DeleteMember(@PathVariable("logId") Long logId){
-            return ResponseEntity.noContent().build();
-        }
+    @Operation(summary="회원탈퇴", description = "회원탈퇴를 할 수 있음")
+    @DeleteMapping("/{logId}")
+    public ResponseEntity<String> DeleteMember(@PathVariable("logId") Long logId){
+        return ResponseEntity.noContent().build();
+    }
 
     }
 

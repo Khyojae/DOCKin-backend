@@ -18,6 +18,7 @@ public class Work_logsDto {
     private Long equipment_id;
     private String title;
     private String log_text;
+    private String image_url;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 }
