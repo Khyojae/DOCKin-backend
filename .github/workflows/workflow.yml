@@ -18,7 +18,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # gradlew 파일에 실행 권한을 부여합니다.
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -33,8 +32,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-spring-app .
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-spring-app
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/dockin-app .
+          docker push ${{ secrets.DOCKER_USERNAME }}/dockin-app
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -43,11 +42,15 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 기존 컨테이너 중지 및 삭제
-            sudo docker stop my-app || true
-            sudo docker rm my-app || true
-            # 최신 이미지 pull 및 실행
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/my-spring-app
-            sudo docker run -d --name my-app -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/my-spring-app
-            # 미사용 이미지 정리
+            # 1. 터미널에서 확인한 정확한 폴더로 이동
+            cd /home/ubuntu/DOCKin-spring
+
+            # 2. 새로운 이미지 가져오기
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/dockin-app:latest
+
+            # 3. 서비스 업데이트
+            # 파일명이 compose.yaml이므로 -f 옵션으로 파일명을 지정합니다.
+            sudo docker compose -f compose.yaml up -d --no-deps dockin-app
+
+            # 4. 미사용 이미지 정리
             sudo docker image prune -f
