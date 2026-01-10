@@ -48,9 +48,12 @@ jobs:
             # 2. 새로운 이미지 가져오기
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/dockin-app:latest
 
-            # 3. 서비스 업데이트
-            # -f 옵션을 제거하여 자동 인식을 유도하고, 안정적인 docker-compose 명령어를 사용합니다.
-            sudo docker-compose up -d --no-deps dockin-app
+            # 3. 구버전 docker-compose 호환성 에러를 피하기 위해 기존 컨테이너 완전 삭제
+            # 에러 방지를 위해 down 후 up 방식을 사용합니다.
+            sudo docker-compose down --remove-orphans
 
-            # 4. 사용하지 않는 옛날 이미지 정리
-            sudo docker image prune -f
+            # 4. 서비스 다시 시작
+            sudo docker-compose up -d dockin-app
+
+            # 5. 사용하지 않는 모든 이미지 정리 (서버 용량 확보)
+            sudo docker image prune -af
