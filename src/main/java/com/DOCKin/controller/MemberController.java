@@ -37,8 +37,9 @@ public class MemberController {
         }
 
     @Operation(summary="회원탈퇴", description = "회원탈퇴를 할 수 있음")
-    @DeleteMapping("/{logId}")
-    public ResponseEntity<String> DeleteMember(@PathVariable("logId") Long logId){
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteMember(@PathVariable("userId") String userId){
+        memberService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
     }
 
