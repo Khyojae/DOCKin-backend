@@ -1,6 +1,7 @@
 package com.DOCKin.controller;
 
 import com.DOCKin.dto.Member.LoginRequestDto;
+import com.DOCKin.dto.Member.LoginResponseDto;
 import com.DOCKin.dto.Member.MemberRequestDto;
 import com.DOCKin.repository.RefreshTokenRepository;
 import com.DOCKin.service.MemberService;
@@ -23,10 +24,10 @@ public class MemberController {
 
     @Operation(summary="로그인",description = "로그인을 할 수 있음")
     @PostMapping("/login")
-    public ResponseEntity<String> getMemberProfile(
+    public ResponseEntity<LoginResponseDto> getMemberProfile(
             @Valid @RequestBody LoginRequestDto request){
-        String token = memberService.login(request);
-        return ResponseEntity.status(HttpStatus.OK).body(token);
+        LoginResponseDto response = memberService.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary="회원가입",description = "회원가입을 할 수 있음")

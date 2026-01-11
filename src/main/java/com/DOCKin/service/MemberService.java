@@ -2,11 +2,13 @@ package com.DOCKin.service;
 
 import com.DOCKin.dto.Member.CustomUserInfoDto;
 import com.DOCKin.dto.Member.LoginRequestDto;
+import com.DOCKin.dto.Member.LoginResponseDto;
 import com.DOCKin.dto.Member.MemberRequestDto;
 import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
+import com.DOCKin.model.Member.RefreshToken;
 import com.DOCKin.repository.MemberRepository;
 import com.DOCKin.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,16 +31,11 @@ public class MemberService{
 
     //로그인 로직
     @Transactional
-    public String login(LoginRequestDto dto){
-        String userId = dto.getUserId();
-        String password = dto.getPassword();
+    public LoginResponseDto login(LoginRequestDto dto){
+        Member member = memberRepository.findByUserId(dto.getUserId()).
+                orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Optional<Member> member = memberRepository.findByUserId(dto.getUserId());
-    if(member.isEmpty()){
-        throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-    }
-
-    if(!encoder.matches(password,member.get().getPassword())){
+    if(!encoder.matches(dto.getPassword(), member.getPassword())){
         throw new BusinessException(ErrorCode.LOGIN_INPUT_INVALID);
     }
         CustomUserInfoDto info = modelMapper.map(member,CustomUserInfoDto.class);
@@ -46,7 +43,12 @@ public class MemberService{
     String accessToken=jwtUtil.createAccessToken(info);
     String refreshToken=jwtUtil.createRefreshToken(info);
 
-    return jwtUtil.createAccessToken(info);
+        RefreshToken refreshTokenEntity= RefreshToken.builder()
+                .userId(member.getUserId())
+                .token(refreshToken)
+                .build();
+
+    return new LoginResponseDto(accessToken,refreshToken);
     }
 
     //회원가입 로직
