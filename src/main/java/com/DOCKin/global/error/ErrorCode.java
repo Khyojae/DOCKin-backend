@@ -18,8 +18,8 @@ public enum ErrorCode {
 
     // User
     USER_NOT_FOUND(404, "U001", "존재하지 않는 사용자입니다."),
-    EMAIL_DUPLICATION(400, "U002", "이미 가입된 이메일입니다."),
-    LOGIN_INPUT_INVALID(400, "U003", "아이디 또는 비밀번호가 일치하지 않습니다.");
+    USERID_DUPLICATION(400, "U002", "이미 가입된 사원번호입니다."),
+    LOGIN_INPUT_INVALID(400, "U003", "사원번호 또는 비밀번호가 일치하지 않습니다.");
 
     private final int status;
     private final String code;

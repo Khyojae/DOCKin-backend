@@ -36,12 +36,13 @@ public class MemberService{
     public String login(LoginRequestDto dto){
         String userId = dto.getUserId();
         String password = dto.getPassword();
+
         Optional<Member> member = memberRepository.findByUserId(dto.getUserId());
     if(member.isEmpty()){
-        throw new UsernameNotFoundException("사원번호가 존재하지 않습니다.");
+        throw new BusinessException(ErrorCode.USER_NOT_FOUND);
     }
     if(!encoder.matches(password,member.get().getPassword())){
-        throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+        throw new BusinessException(ErrorCode.LOGIN_INPUT_INVALID);
     }
         CustomUserInfoDto info = modelMapper.map(member,CustomUserInfoDto.class);
     return jwtUtil.createAccessToken(info);
@@ -51,7 +52,7 @@ public class MemberService{
     @Transactional
     public String signup(MemberRequestDto dto) {
         if(memberRepository.existsById(dto.getUserId())) {
-            throw new ValidateMemberException("이미 존재하는 사번입니다: " + dto.getUserId());
+            throw new BusinessException(ErrorCode.USERID_DUPLICATION);
         }
         Member member = Member.builder()
                 .userId(dto.getUserId())
@@ -63,7 +64,6 @@ public class MemberService{
                 .shipYardArea(dto.getShipYardArea())
                 .build();
         memberRepository.save(member);
-
         return member.getUserId();
     }
 
