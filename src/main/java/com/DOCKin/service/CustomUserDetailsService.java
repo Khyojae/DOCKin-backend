@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+//로그인 인증 로직
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
