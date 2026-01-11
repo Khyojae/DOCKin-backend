@@ -1,5 +1,7 @@
 package com.DOCKin.service;
 
+import com.DOCKin.global.error.BusinessException;
+import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 1. DB에서 사용자 조회
         return memberRepository.findByUserId(userId)
                 .map(this::createUserDetails)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 사원번호를 가진 사용자를 찾을 수 없습니다: " + userId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     // 2. DB에서 가져온 Member 객체를 스프링 시큐리티의 UserDetails 객체로 변환
