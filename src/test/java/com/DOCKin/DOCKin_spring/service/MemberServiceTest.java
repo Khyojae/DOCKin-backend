@@ -1,4 +1,4 @@
-package com.DOCKin.DOCKin_spring.Member;
+package com.DOCKin.DOCKin_spring.service;
 
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.repository.MemberRepository;
