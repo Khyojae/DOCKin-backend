@@ -1,6 +1,7 @@
 package com.DOCKin.global.security.config;
 
 import com.DOCKin.global.security.jwt.JwtAuthFilter;
+import com.DOCKin.global.security.jwt.JwtBlacklist;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
@@ -47,7 +48,7 @@ public class SecurityConfig {
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtBlacklist jwtBlacklist) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,7 +60,7 @@ public class SecurityConfig {
                 .requestMatchers(AUTH_WHITELIST).permitAll() // 화이트리스트 전체 허용
                 .anyRequest().authenticated());
 
-        http.addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil),
+        http.addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil,jwtBlacklist),
                 UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling(exception -> exception

@@ -3,6 +3,7 @@ package com.DOCKin.service;
 import com.DOCKin.dto.Member.*;
 import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
+import com.DOCKin.global.security.jwt.JwtBlacklist;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.model.Member.RefreshToken;
@@ -10,6 +11,7 @@ import com.DOCKin.repository.MemberRepository;
 import com.DOCKin.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,16 +23,16 @@ public class MemberService{
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final PasswordEncoder encoder;
     private final ModelMapper modelMapper;
-
+    private final PasswordEncoder passwordEncoder;
+    private final JwtBlacklist jwtBlacklist;
     //로그인 로직
     @Transactional
     public LoginResponseDto login(LoginRequestDto dto){
         Member member = memberRepository.findByUserId(dto.getUserId()).
                 orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-    if(!encoder.matches(dto.getPassword(), member.getPassword())){
+    if(!passwordEncoder.matches(dto.getPassword(), member.getPassword())){
         throw new BusinessException(ErrorCode.LOGIN_INPUT_INVALID);
     }
         CustomUserInfoDto info = modelMapper.map(member,CustomUserInfoDto.class);
@@ -50,7 +52,12 @@ public class MemberService{
     @Transactional
     public void logout(LogOutRequestDto dto){
         refreshTokenRepository.deleteByToken(dto.getRefreshToken());
-        //access toekn black list 추후 구현
+        String token = dto.getAccessToken();
+        if(token.startsWith("Bearer ")){
+            token = token.substring(7);
+        }
+        long expiration = jwtUtil.getExpiration(token);
+        jwtBlacklist.add(token,expiration);
     }
 
     //회원가입 로직
@@ -59,10 +66,11 @@ public class MemberService{
         if(memberRepository.existsById(dto.getUserId())) {
             throw new BusinessException(ErrorCode.USERID_DUPLICATION);
         }
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
         Member member = Member.builder()
                 .userId(dto.getUserId())
                 .name(dto.getName())
-                .password(encoder.encode(dto.getPassword()))
+                .password(encodedPassword)
                 .role(dto.getRole())
                 .language_code(dto.getLanguage_code())
                 .tts_enabled(dto.getTts_enabled())

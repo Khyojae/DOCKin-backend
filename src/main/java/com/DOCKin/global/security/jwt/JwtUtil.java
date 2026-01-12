@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -76,6 +77,11 @@ public class JwtUtil {
             log.info("JWT claims string is empty", e);
         }
         return false;
+    }
+
+    public long getExpiration(String token){
+        Date expiration = parseClaims(token).getExpiration();
+        return expiration.getTime();
     }
 
     //Jwt Cliams 추출

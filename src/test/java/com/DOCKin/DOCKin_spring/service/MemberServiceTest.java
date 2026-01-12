@@ -1,5 +1,8 @@
 package com.DOCKin.DOCKin_spring.service;
 
+import com.DOCKin.dto.Member.LogOutRequestDto;
+import com.DOCKin.global.security.jwt.JwtBlacklist;
+import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.repository.MemberRepository;
 import com.DOCKin.repository.RefreshTokenRepository;
@@ -21,6 +24,12 @@ public class MemberServiceTest {
 
     @Mock
     private MemberRepository memberRepository; // 가짜 리포지토리
+
+    @Mock
+    private JwtUtil jwtUtil;
+
+    @Mock
+    private JwtBlacklist jwtBlacklist;
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository; // 가짜 리포지토리
@@ -47,5 +56,33 @@ public class MemberServiceTest {
 
         // refreshTokenRepository의 deleteByUserId 메서드가 해당 ID로 호출되었는지 확인
         verify(refreshTokenRepository, times(1)).deleteByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("로그아웃 성공 - 리프레시 토큰 삭제 및 블랙리스트 등록")
+    void logout_success() {
+        // given
+        String accessToken = "Bearer valid-access-token";
+        String refreshToken = "valid-refresh-token";
+        String pureToken = "valid-access-token";
+        long expiration = 1000L;
+
+        LogOutRequestDto dto = LogOutRequestDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        // Mock 설정: jwtUtil.getExpiration이 호출되면 1000L을 반환해라
+        when(jwtUtil.getExpiration(pureToken)).thenReturn(expiration);
+
+        // when
+        memberService.logout(dto);
+
+        // then
+        // 1. 리프레시 토큰이 삭제되었는지 검증
+        verify(refreshTokenRepository, times(1)).deleteByToken(refreshToken);
+
+        // 2. 블랙리스트에 순수 토큰(Bearer 제외)과 만료시간이 저장되었는지 검증
+        verify(jwtBlacklist, times(1)).add(pureToken, expiration);
     }
 }
