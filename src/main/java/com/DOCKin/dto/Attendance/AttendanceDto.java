@@ -1,5 +1,6 @@
 package com.DOCKin.dto.Attendance;
 
+import com.DOCKin.model.Attendance.Attendance;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,4 +30,20 @@ public class AttendanceDto {
     //출퇴근장소
     private String inLocation;
     private String OutLocation;
+
+    public AttendanceDto(String inLocation) {
+        this.inLocation = inLocation;
+    }
+
+    public static AttendanceDto fromEntity(Attendance saved) {
+        return AttendanceDto.builder()
+                .id(saved.getId())
+                .userId(saved.getMember().getUserId())
+                .clockInTime(saved.getClockInTime())
+                .clockOutTime(saved.getClockOutTime())
+                .status(saved.getStatus().name())
+                .inLocation(saved.getInLocation())
+                .OutLocation(saved.getOutLocation())
+                .build();
+    }
 }
