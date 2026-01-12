@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final MemberRepository memberRepository;
-    //1일 1출근 가정
+    // 교대 근무 가정
 
     //출근로직
     @Transactional
@@ -68,18 +68,18 @@ public class AttendanceService {
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        //시간 갱신
-        LocalDateTime now =LocalDateTime.now();
-        LocalDate todayDate = now.toLocalDate();
-
-        //오류
-        Attendance attendance = attendanceRepository.findByMemberAndWorkDate(member,todayDate)
-                .orElseThrow(()->new IllegalArgumentException("출근처리를 먼저하세요."));
+        //가장 마지막의 출근 기록을 가져옴
+        Attendance attendance = attendanceRepository.findFirstByMemberOrderByClockInTimeDesc(member)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if(attendance.getClockOutTime()!=null){
-            throw new IllegalArgumentException("이미 오늘 퇴근 처리가 완료되었습니다.");
+            throw new IllegalArgumentException("출근 기록이 존재하지 않습니다.");
         }
-        attendance.recordClockOut(now,dto.getOutLocation(),AttendanceStatus.NORMAL);
+
+        //시간 갱신
+        LocalDateTime now =LocalDateTime.now();
+        attendance.recordClockOut(now,dto.getOutLocation(),attendance.getStatus());
+
         return AttendanceDto.fromEntity(attendance);
     }
 }
