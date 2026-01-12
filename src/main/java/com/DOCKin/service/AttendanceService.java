@@ -17,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.DOCKin.dto.Attendance.AttendanceDto.fromEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +62,7 @@ public class AttendanceService {
                 .build();
 
         Attendance saved = attendanceRepository.save(attendance);
-        return AttendanceDto.fromEntity(saved);
+        return fromEntity(saved);
     }
 
     //퇴근로직
@@ -80,6 +84,18 @@ public class AttendanceService {
         LocalDateTime now =LocalDateTime.now();
         attendance.recordClockOut(now,dto.getOutLocation(),attendance.getStatus());
 
-        return AttendanceDto.fromEntity(attendance);
+        return fromEntity(attendance);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AttendanceDto> getMyAttendanceRecords(String userId){
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        List<Attendance> records = attendanceRepository.findByMemberOrderByWorkDateDesc(member);
+
+        return records.stream()
+                .map(AttendanceDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }
