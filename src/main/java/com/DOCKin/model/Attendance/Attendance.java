@@ -44,6 +44,5 @@ public class Attendance {
     public void recordClockOut(LocalDateTime outTime, String location, AttendanceStatus status){
         this.clockOutTime = outTime;
         this.outLocation = location;
-        this.status = status;
     }
 }
