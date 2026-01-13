@@ -1,6 +1,7 @@
 package com.DOCKin.service;
 
 import com.DOCKin.dto.WorkLogs.WorkLogsCreateRequestDto;
+import com.DOCKin.dto.WorkLogs.WorkLogsUpdateRequestDto;
 import com.DOCKin.dto.WorkLogs.Work_logsDto;
 import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
@@ -59,5 +60,28 @@ public class WorkLogsService {
        Page<Work_logs> logs = workLogsRepository.findByMemberIn(areaMembers,pageable);
 
        return logs.map(Work_logsDto::from);
+    }
+
+    //게시물 수정
+    @Transactional
+    public Work_logsDto updateWorklog(String userId, Long logId, WorkLogsCreateRequestDto dto){
+        Work_logs logs = workLogsRepository.findById(logId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        //작성자와 수정자가 같은지 확인
+        if(!logs.getMember().getUserId().equals(userId)){
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        if(dto.getTitle()!=null) logs.setTitle(dto.getTitle());
+        if(dto.getLog_text()!=null) logs.setLog_text(dto.getLog_text());
+        if(dto.getImage_url()!=null) logs.setImage_url(dto.getImage_url());
+        if(dto.getEquipmentId()!=null){
+            Equipment equipment = equipmentRepository.findById(dto.getEquipmentId())
+                    .orElseThrow(()->new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND));
+            logs.setEquipment(equipment);
+        }
+
+        return Work_logsDto.from(logs);
     }
 }
