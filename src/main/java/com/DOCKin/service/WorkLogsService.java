@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -41,17 +44,20 @@ public class WorkLogsService {
                 .member(member)
                 .build();
 
+         return Work_logsDto.from(workLogsRepository.save(work_logs));
+    }
 
-        Work_logs savedlog = workLogsRepository.save(work_logs);
-            return Work_logsDto.builder()
-                    .log_id(savedlog.getLog_id())
-                    .user_id(member.getUserId())
-                    .equipment_id(savedlog.getEquipment().getEquipment_id())
-                    .title(savedlog.getTitle())
-                    .log_text(savedlog.getLog_text())
-                    .image_url(savedlog.getImage_url())
-                    .created_at(savedlog.getCreated_at())
-                    .updated_at(savedlog.getUpdated_at())
-                    .build();
+    //게시물 조회
+    @Transactional(readOnly = true)
+    public List<Work_logsDto> readWorklog(String userId){
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        String area = member.getShipYardArea();
+       List<Member> areaMembers= memberRepository.findByShipYardArea(area);
+       List<Work_logs> logs = workLogsRepository.findByMemberIn(areaMembers);
+
+       return logs.stream()
+               .map(Work_logsDto::from)
+               .collect(Collectors.toList());
     }
 }

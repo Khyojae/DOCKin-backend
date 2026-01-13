@@ -1,5 +1,6 @@
 package com.DOCKin.dto.WorkLogs;
 
+import com.DOCKin.model.Work_logs;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,4 +38,17 @@ public class Work_logsDto {
 
     @Schema(description = "수정 일시", example = "2026-01-12T15:30:00")
     private LocalDateTime updated_at;
+
+    public static Work_logsDto from(Work_logs entity) {
+        return Work_logsDto.builder()
+                .log_id(entity.getLog_id())
+                .user_id(entity.getMember().getUserId())
+                .equipment_id(entity.getEquipment().getEquipment_id())
+                .title(entity.getTitle())
+                .log_text(entity.getLog_text())
+                .image_url(entity.getImage_url())
+                .created_at(entity.getCreated_at())
+                .updated_at(entity.getUpdated_at())
+                .build();
+    }
 }
