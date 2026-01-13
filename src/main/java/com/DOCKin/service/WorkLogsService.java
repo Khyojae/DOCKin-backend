@@ -84,4 +84,17 @@ public class WorkLogsService {
 
         return Work_logsDto.from(logs);
     }
+
+    @Transactional
+    public void deleteWorklog(String userId, Long logId){
+        Work_logs log = workLogsRepository.findById(logId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+       //작성자와 같은지 확인
+        if(!log.getMember().getUserId().equals(userId)){
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+      workLogsRepository.delete(log);
+    }
 }
