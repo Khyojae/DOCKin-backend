@@ -16,4 +16,7 @@ public interface Work_logsRepository extends JpaRepository<Work_logs, Long> {
     List<Work_logs> findByMember(Member member);
     List<Work_logs> findByMemberIn(Collection<Member> members);
     Page<Work_logs> findByMemberIn(List<Member> members, Pageable pageable);
+    Page<Work_logs> findAllByMember_UserId(String targetUserId, Pageable pageable);
+
+    List<Work_logs> findAllByMember_UserId(String userId);
 }

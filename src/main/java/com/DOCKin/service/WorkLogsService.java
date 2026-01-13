@@ -50,16 +50,38 @@ public class WorkLogsService {
          return Work_logsDto.from(workLogsRepository.save(work_logs));
     }
 
-    //게시물 조회
+    //전체 게시물 조회
     @Transactional(readOnly = true)
     public Page<Work_logsDto> readWorklog(String userId, Pageable pageable){
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         String area = member.getShipYardArea();
        List<Member> areaMembers= memberRepository.findByShipYardArea(area);
        Page<Work_logs> logs = workLogsRepository.findByMemberIn(areaMembers,pageable);
 
        return logs.map(Work_logsDto::from);
+    }
+
+    //다른 작업자의 작업일지 조회기능
+    @Transactional(readOnly = true)
+    public Page<Work_logsDto> readOtherWorklog(String currentuserId, String targetUserId, Pageable pageable){
+        // 내 사원번호
+        Member member = memberRepository.findByUserId(currentuserId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        //검색하려는 사원번호
+        Member target = memberRepository.findByUserId(targetUserId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        //같은 구역에 있는 사용자들만 검색이 가능하다
+        if(!member.getShipYardArea().equals(target.getShipYardArea())){
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        Page<Work_logs> work_logs = workLogsRepository.findAllByMember_UserId(targetUserId,pageable);
+
+        return work_logs.map(Work_logsDto::from);
     }
 
     //게시물 수정
@@ -85,6 +107,7 @@ public class WorkLogsService {
         return Work_logsDto.from(logs);
     }
 
+    //게시물 삭제
     @Transactional
     public void deleteWorklog(String userId, Long logId){
         Work_logs log = workLogsRepository.findById(logId)
