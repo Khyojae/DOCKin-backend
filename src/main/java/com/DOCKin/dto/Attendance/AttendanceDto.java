@@ -57,7 +57,7 @@ public class AttendanceDto {
                 .totalWorkTime(saved.getTotalWorkTime())
                 .status(saved.getStatus().name())
                 .inLocation(saved.getInLocation())
-                .OutLocation(saved.getOutLocation())
+                .outLocation(saved.getOutLocation())
                 .build();
     }
 }
