@@ -6,7 +6,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -26,65 +25,66 @@ public class JwtUtil {
             @Value("${jwt.refresh_expiration_time}") final long refreshTokenExpTime)
     {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key= Keys.hmacShaKeyFor(keyBytes);
-        this.accessTokenExpTime=accessTokenExpTime;
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.accessTokenExpTime = accessTokenExpTime;
         this.refreshTokenExpTime = refreshTokenExpTime;
     }
 
-    //Access Token 생성
+    // Access Token 생성
     public String createAccessToken(CustomUserInfoDto member){
         return createToken(member, accessTokenExpTime);
-    }
-
-    //Jwt 생성
-    private String createToken(CustomUserInfoDto member, long expireTime){
-        Claims claims = Jwts.claims();
-        claims.put("userId",member.getUserId());
-        claims.put("name",member.getName());
-        claims.put("role",member.getRole());
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(Date.from(now.toInstant()))
-                .setExpiration(Date.from(tokenValidity.toInstant()))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
     }
 
     public String createRefreshToken(CustomUserInfoDto member) {
         return createToken(member, refreshTokenExpTime);
     }
 
-    //Token에서 UserId 추출
-    public Long getUserId(String token){
-        return parseClaims(token).get("userId",Long.class);
+    // 빌더 패턴으로 데이터를 직접 주입하여 누락 방지
+    private String createToken(CustomUserInfoDto member, long expireTime){
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
+
+        // 빌드 시점에 로그를 찍어 데이터가 들어오는지 확인
+        log.info("@@@ Generating Token for User: {}", member.getUserId());
+
+        return Jwts.builder()
+                .setSubject(member.getUserId()) // 필터에서 getSubject로 꺼낼 값
+                .claim("userId", member.getUserId())
+                .claim("name", member.getName())
+                .claim("role", member.getRole())
+                .setIssuedAt(Date.from(now.toInstant()))
+                .setExpiration(Date.from(tokenValidity.toInstant()))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    //jWT 검증
+    // [핵심 수정] 문자열 userId를 반환하도록 추출 로직 변경
+    public String getUserId(String token){
+        return parseClaims(token).getSubject();
+    }
+
+    // JWT 검증
     public boolean isValidToken(String token){
         try{
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        }catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT", e);
+        } catch (SecurityException | MalformedJwtException e) {
+            log.info("Invalid JWT signature.", e);
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT", e);
+            log.info("Expired JWT token.", e);
         } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT", e);
+            log.info("Unsupported JWT token.", e);
         } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty", e);
+            log.info("JWT claims string is empty.", e);
         }
         return false;
     }
 
     public long getExpiration(String token){
-        Date expiration = parseClaims(token).getExpiration();
-        return expiration.getTime();
+        return parseClaims(token).getExpiration().getTime();
     }
 
-    //Jwt Cliams 추출
+    // Claims 추출
     public Claims parseClaims(String accessToken){
         try{
             return Jwts.parserBuilder()

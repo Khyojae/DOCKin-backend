@@ -1,6 +1,6 @@
 package com.DOCKin.model.SafetyCourse;
 
-import com.DOCKin.model.Member.User;
+import com.DOCKin.model.Member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +21,7 @@ public class SafetyEnrollment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User userId;
+    private Member userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")

@@ -7,6 +7,7 @@ import com.DOCKin.global.security.jwt.JwtBlacklist;
 import com.DOCKin.global.security.jwt.JwtUtil;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.model.Member.RefreshToken;
+import com.DOCKin.model.Member.UserRole;
 import com.DOCKin.repository.MemberRepository;
 import com.DOCKin.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,17 +36,23 @@ public class MemberService{
     if(!passwordEncoder.matches(dto.getPassword(), member.getPassword())){
         throw new BusinessException(ErrorCode.LOGIN_INPUT_INVALID);
     }
-        CustomUserInfoDto info = modelMapper.map(member,CustomUserInfoDto.class);
+        CustomUserInfoDto info = CustomUserInfoDto.builder()
+                .userId(member.getUserId())
+                .name(member.getName())
+                .role(member.getRole())
+                .build();
 
     String accessToken=jwtUtil.createAccessToken(info);
     String refreshToken=jwtUtil.createRefreshToken(info);
+    String name = member.getName();
+        UserRole role = member.getRole();
 
         RefreshToken refreshTokenEntity= RefreshToken.builder()
                 .userId(member.getUserId())
                 .token(refreshToken)
                 .build();
         refreshTokenRepository.save(refreshTokenEntity);
-    return new LoginResponseDto(accessToken,refreshToken);
+    return new LoginResponseDto(accessToken,refreshToken,name,role);
     }
 
     //로그아웃 로직

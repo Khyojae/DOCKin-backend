@@ -45,10 +45,6 @@ public class Member {
     @Column(name = "work_shift")
     private WorkShift workShift;
 
-    public void updateSettings(String language_code, Boolean tts_enabled) {
-        this.language_code = language_code;
-        this.tts_enabled = tts_enabled;
-    }
 
     public void setPassword(String password)
     {
