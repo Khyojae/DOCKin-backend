@@ -1,6 +1,8 @@
 package com.DOCKin.dto.Member;
 
+import com.DOCKin.model.Member.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,4 +23,13 @@ public class LoginResponseDto {
             example = "eyJhbGciOiJIUzI1NiJ9...",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String refreshToken;
+
+    @Schema(description = "이름",
+            example = "홍길동", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message="이름은 필수 입력 값입니다.")
+    private String name;
+
+    @Schema(description = "사용자 권한", example = "USER")
+    private UserRole role;
+
 }
