@@ -1,10 +1,9 @@
 USE Dockin;
 SET FOREIGN_KEY_CHECKS = 0;
 
-INSERT IGNORE INTO users (user_id, name, password, role, ship_yard_area, language_code, tts_enabled)
-VALUES ('1001', '김철수', '1234', 'ADMIN', '제8조선소', 'ko', 1),
-       ('1002', '이영희', '1234', 'ADMIN', '제8조선소', 'en', 0);
-
+REPLACE INTO users (user_id, name, password, role, ship_yard_area, language_code, tts_enabled)
+VALUES ('1001', '김철수', '$2a$10$w3v6nC.D5M9xMHFYpAdSre7pU2Zp8rL.S1pY3gY.yD2h/tW7QfC6i', 'ADMIN', '제8조선소', 'ko', 1),
+       ('1002', '이영희', '$2a$10$w3v6nC.D5M9xMHFYpAdSre7pU2Zp8rL.S1pY3gY.yD2h/tW7QfC6i', 'ADMIN', '제8조선소', 'en', 0);
 
 INSERT IGNORE INTO equipment (equipment_id, name, qr_code)
 VALUES (1, '굴착기 01', 'QR001'), (2, '지게차 05', 'QR002');
