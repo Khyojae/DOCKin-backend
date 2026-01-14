@@ -46,7 +46,7 @@ public class AttendanceDto {
     private String inLocation;
 
     @Schema(description = "퇴근 장소", example = "제1조선소")
-    private String OutLocation;
+    private String outLocation;
 
     public static AttendanceDto fromEntity(Attendance saved) {
         return AttendanceDto.builder()

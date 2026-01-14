@@ -81,8 +81,17 @@ public class AttendanceService {
         }
 
         //시간 갱신
+        LocalDateTime now = LocalDateTime.now();
         attendance.setClockOutTime(LocalDateTime.now());
         attendance.setOutLocation(dto.getOutLocation());
+
+        java.time.Duration duration = java.time.Duration.between(attendance.getClockInTime(),now);
+        long h = duration.toHours();
+        long m = duration.toMinutesPart();
+        long s = duration.toSecondsPart();
+
+        String timeString = String.format("%02d:%02d:%02d", h, m, s);
+        attendance.setTotalWorkTime(timeString);
 
         return fromEntity(attendance);
     }

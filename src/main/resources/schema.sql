@@ -126,7 +126,7 @@ CREATE TABLE attendance (
                             clock_out_time DATETIME,
                             work_date DATE NOT NULL,
                             role ENUM('NORMAL','LATE','ABSENT','VACATION','SICK'),
-                            work_shift ENUM('MORNING', 'AFTERNOON', 'NIGHT'),
+
                             in_location VARCHAR(255),
                             out_location VARCHAR(255),
                             CONSTRAINT fk_attendance_member FOREIGN KEY (user_id) REFERENCES users (user_id),

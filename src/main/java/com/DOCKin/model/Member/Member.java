@@ -1,6 +1,5 @@
 package com.DOCKin.model.Member;
 
-import com.DOCKin.model.Attendance.WorkShift;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -41,9 +40,7 @@ public class Member {
     @Column(nullable = false, length = 100)
     private String shipYardArea;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "work_shift")
-    private WorkShift workShift;
+
 
 
     public void setPassword(String password)

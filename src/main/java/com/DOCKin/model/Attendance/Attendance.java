@@ -45,10 +45,6 @@ public class Attendance {
     @Column(name="out_location")
     private String outLocation;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "work_shift")
-    private WorkShift workshift;
-
     @Column(name="total_work_time")
     private String totalWorkTime;
 
