@@ -3,9 +3,7 @@ package com.DOCKin.model.Chat;
 import com.DOCKin.dto.chat.MessageType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -14,6 +12,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "chat_messages",
 indexes = {@Index(name="idx_room_sent",columnList = "room_id, sent_at")})
 public class ChatMessages {
