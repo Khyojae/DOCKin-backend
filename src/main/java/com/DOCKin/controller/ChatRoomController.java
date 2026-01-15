@@ -57,11 +57,4 @@ public class ChatRoomController {
         return ResponseEntity.ok(Collections.emptyList());
     }
 
-    @Operation(summary="메시지 보내기",description="메시지는 전역번호로")
-    @PostMapping("/room/{roomId}/message")
-    public ResponseEntity<ChatMessageRequestDto> createMessage(@PathVariable String roomId,
-                                                               @RequestBody ChatMessageRequestDto requestDto){
-        return ResponseEntity.ok(null);
-    }
-
 }
