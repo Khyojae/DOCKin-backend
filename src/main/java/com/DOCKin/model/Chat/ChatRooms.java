@@ -26,10 +26,21 @@ public class ChatRooms {
     @Column(name="created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "last_message_content")
+    private String lastMessageContent;
+
+    @Column(name = "last_messsage_at")
+    private LocalDateTime lastMessageAt;
+
     @PrePersist
     public void prePersist(){
         this.createdAt=LocalDateTime.now();
         if(this.isGroup==null) this.isGroup=false;
+    }
+
+    public void updateLastMessage(String content, LocalDateTime sentAt){
+        this.this.lastMessageContent = content;
+        this.lastMessageAt=sentAt;
     }
 
 }

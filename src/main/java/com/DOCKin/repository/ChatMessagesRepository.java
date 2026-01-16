@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChatMessagesRepository extends JpaRepository<ChatMessages,Long> {
     Slice<ChatMessages> findByChatRoomsOrderBySentAtDesc(ChatRooms chatRooms, Pageable pageable);
-    Slice<ChatMessages> findByChatRoomsRoomIdOrderBySentAtDesc(Long roomId, Pageable pageable);
+    Slice<ChatMessages> findByChatRoomsRoomIdOrderBySentAtDesc(String roomId, Pageable pageable);
+    Slice<ChatMessages> findByRoomIdOrderByCreatedAtDesc(String roomId,Pageable pageable);
 }
