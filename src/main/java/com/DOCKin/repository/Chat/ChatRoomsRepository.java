@@ -6,8 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ChatRoomsRepository extends JpaRepository<ChatRooms,Integer> {
     @Query("SELECT r FROM ChatRooms r JOIN r.members m WHERE m.member = :member")
-    Page<ChatRooms> findByMembers(Member member, Pageable pageable);
+    Page<ChatRooms> findByMembers(@Param("member") Member member, Pageable pageable);
 }

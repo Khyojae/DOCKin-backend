@@ -63,6 +63,21 @@ public class ChatRoomService {
         return chatRoomsPage.map(ChatRoomResponseDto::from);
     }
 
+    //특정 채팅방 목록 가져오기
+    @Transactional(readOnly = true)
+    public  Page<ChatRoomResponseDto> getOtherChatRooms(String userId, Pageable pageable,String targetUserId){
+        //내 아이디
+        Member member =memberRepository.findByUserId(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        //타깃 아이디
+        Member target=memberRepository.findByUserId(targetUserId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Page<ChatRooms> chatRooms = chatRoomsRepository.findByMembers(target,pageable);
+        return  chatRooms.map(ChatRoomResponseDto::from);
+    }
+
 
     //채팅방 수정
     @Transactional
