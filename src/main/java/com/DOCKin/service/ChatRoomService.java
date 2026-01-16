@@ -8,8 +8,8 @@ import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.model.Chat.ChatMembers;
 import com.DOCKin.model.Chat.ChatRooms;
 import com.DOCKin.model.Member.Member;
-import com.DOCKin.repository.ChatMembersRepository;
-import com.DOCKin.repository.ChatRoomsRepository;
+import com.DOCKin.repository.Chat.ChatMembersRepository;
+import com.DOCKin.repository.Chat.ChatRoomsRepository;
 import com.DOCKin.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,12 +54,13 @@ public class ChatRoomService {
 
     //채팅방 목록 가져오기
     @Transactional(readOnly = true)
-    public Page<ChatRoomResponseDto> getChatRoom(String userId, Pageable pageable){
+    public Page<ChatRoomResponseDto> getChatRooms(String userId, Pageable pageable){
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        String area = chatRoomsRepository.fin
+        Page<ChatRooms> chatRoomsPage = chatRoomsRepository.findByMembers(member,pageable);
 
+        return chatRoomsPage.map(ChatRoomResponseDto::from);
     }
 
 

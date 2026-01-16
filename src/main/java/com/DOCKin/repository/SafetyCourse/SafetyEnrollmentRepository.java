@@ -1,4 +1,4 @@
-package com.DOCKin.repository;
+package com.DOCKin.repository.SafetyCourse;
 
 import com.DOCKin.model.SafetyCourse.SafetyEnrollment;
 import org.springframework.data.jpa.repository.JpaRepository;

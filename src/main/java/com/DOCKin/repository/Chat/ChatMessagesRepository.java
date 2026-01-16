@@ -1,4 +1,4 @@
-package com.DOCKin.repository;
+package com.DOCKin.repository.Chat;
 
 import com.DOCKin.model.Chat.ChatMessages;
 import com.DOCKin.model.Chat.ChatRooms;
