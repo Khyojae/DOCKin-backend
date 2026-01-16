@@ -7,8 +7,14 @@ import com.DOCKin.repository.ChatMessagesRepository;
 import com.DOCKin.repository.ChatRoomsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +23,9 @@ public class ChatService {
     private final ChatMessagesRepository chatMessagesRepository;
     private final ChatRoomsRepository chatRoomsRepository;
 
+    //메시지 저장
     @Async("messageExecutor")
+    @Transactional
     public void saveMessage(ChatMessageRequestDto dto){
         ChatRooms room = chatRoomsRepository.findById(dto.getRoomId())
                 .orElseThrow(()->new RuntimeException("채팅방을 찾을 수 없습니다."));
@@ -29,9 +37,18 @@ public class ChatService {
                     .content(dto.getContent())
                     .messageType(dto.getMessageType())
                     .build();
+
             chatMessagesRepository.save(messages);
+            room.updateLastMessage(dto.getContent(), LocalDateTime.now());
+
         } catch (Exception e){
             log.error("메시지 저장 실패: {}",e.getMessage());
         }
+    }
+
+    //이전 채팅 내역 불러오기
+    @Transactional(readOnly = true)
+    public Slice<ChatMessages> getChatHistory(String roomId, Pageable pageable){
+        return chatMessagesRepository.findByRoomIdOrderByCreatedAtDesc(roomId,pageable);
     }
 }

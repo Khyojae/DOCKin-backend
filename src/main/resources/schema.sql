@@ -136,6 +136,8 @@ CREATE TABLE absence_requests (
                                   requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                   processed_by VARCHAR(50), -- 승인/거절 처리한 관리자
                                   processed_at DATETIME,
+                                  last_message_content TEXT,
+                                  last_message_at DATETIME,
                                   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
                                   FOREIGN KEY (processed_by) REFERENCES users(user_id)
 );
@@ -144,7 +146,8 @@ CREATE TABLE absence_requests (
 CREATE TABLE chat_rooms (
                             room_id INT PRIMARY KEY AUTO_INCREMENT,
                             room_name VARCHAR(100), -- 단체방 이름 (1:1 방은 NULL 가능)
-                            is_group BOOLEAN DEFAULT FALSE, -- 단체방 여부 (TRUE: 단체, FALSE: 1:1)
+                            is_group BOOLEAN DEFAULT FALSE, -- 단체방 여부 (TRUE: 단체, FALSE: 1:1),
+                            creator_id VARCHAR(50),
                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

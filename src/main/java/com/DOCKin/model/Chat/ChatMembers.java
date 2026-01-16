@@ -2,15 +2,15 @@ package com.DOCKin.model.Chat;
 
 import com.DOCKin.model.Member.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Table(name="chat_members")
 public class ChatMembers {
     @Id

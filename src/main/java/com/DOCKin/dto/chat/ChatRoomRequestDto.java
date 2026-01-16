@@ -25,6 +25,10 @@ public class ChatRoomRequestDto {
     @NotNull
     private Boolean is_group;
 
+    @Schema(description = "방장 id", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull
+    private String creatorId;
+
     @Schema(description = "참가하는 인원의 사원번호", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "최소 한 명 이상의 참가자가 필요합니다.")
     private List<String> participantIds;

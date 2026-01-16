@@ -22,6 +22,11 @@ public enum ErrorCode {
     LOGIN_INPUT_INVALID(400, "U003", "사원번호 또는 비밀번호가 일치하지 않습니다."),
     EQUIPMENT_NOT_FOUND(400, "U004", "존재하지 않는 장비 번호입니다."),
 
+   // Chat
+    CHATROOM_NOT_FOUND(400, "C001", "존재하지 않는 채팅입니다."),
+    CHATROOM_AUTHOR(400, "C002", "채팅방의 권한이 없습니다."),
+
+
     // Worklog
     LOG_NOT_FOUND(404, "W001", "존재하지 않는 작업 일지입니다."),
     NOT_LOG_AUTHOR(403, "W002", "해당 일지의 작성자가 아닙니다.");

@@ -1,5 +1,6 @@
 package com.DOCKin.dto.chat;
 
+import com.DOCKin.model.Chat.ChatRooms;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -19,13 +20,38 @@ public class ChatRoomResponseDto {
     @Schema(description = "채팅방 이름", requiredMode = Schema.RequiredMode.REQUIRED)
     private String room_name;
 
+    @Schema(description = "채팅방 id", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Integer room_Id;
+
     @Schema(description = "그룹채팅방인지 그냥 1대1채팅방인지", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean is_group;
 
     @Schema(description = "참가하는 인원의 사원번호", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> participantIds;
 
+    @Schema(description = "방장id",requiredMode = Schema.RequiredMode.REQUIRED)
+    private String creatorId;
+
     @Schema(description = "만든 시각", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
+
+    @Schema(description = "마지막 메시지 내용")
+    private String lastMessageContent;
+
+    @Schema(description = "마지막 메시지 시간")
+    private LocalDateTime lastMessageAt;
+
+
+    public static ChatRoomResponseDto from(ChatRooms entity){
+        return ChatRoomResponseDto.builder()
+                .room_Id(entity.getRoomId())
+                .room_name(entity.getRoomName())
+                .is_group(entity.getIsGroup())
+                .creatorId(entity.getCreatorId())
+                .createdAt(entity.getCreatedAt())
+                .lastMessageContent(entity.getLastMessageContent())
+                .lastMessageAt(entity.getLastMessageAt())
+                .build();
+    }
 }
