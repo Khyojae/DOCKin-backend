@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -78,10 +79,10 @@ public class ChatRoomController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary="채팅 내역 조회",description = "특정 채팅방의 이전에 보냈던 메시지 조회")
+   /* @Operation(summary="채팅 내역 조회",description = "특정 채팅방의 이전에 보냈던 메시지 조회")
     @GetMapping("/room/{roomId}/messages")
-    public ResponseEntity<List<ChatMessageResponseDto>> getChatMessages(@PathVariable String roomId){
+    public ResponseEntity<Slice<ChatMessageResponseDto>> getChatMessages(@PathVariable String roomId){
         return ResponseEntity.ok(Collections.emptyList());
-    }
+    } */
 
 }
