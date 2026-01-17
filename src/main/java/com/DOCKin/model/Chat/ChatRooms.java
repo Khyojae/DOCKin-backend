@@ -37,7 +37,8 @@ public class ChatRooms {
     @Column(name = "last_message_at")
     private LocalDateTime lastMessageAt;
 
-    @OneToMany(mappedBy = "chatRoom",cascade = CascadeType.ALL,orphanRemoval = true)
+    @Builder.Default
+    @OneToMany(mappedBy = "chatRooms",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ChatMembers> members = new ArrayList<>();
 
     @PrePersist

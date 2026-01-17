@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -50,6 +51,7 @@ public class ChatRoomResponseDto {
                 .is_group(entity.getIsGroup())
                 .creatorId(entity.getCreatorId())
                 .createdAt(entity.getCreatedAt())
+                .participantIds(entity.getMembers().stream().map(member->member.getMember().getUserId()).collect(Collectors.toList()))
                 .lastMessageContent(entity.getLastMessageContent())
                 .lastMessageAt(entity.getLastMessageAt())
                 .build();

@@ -1,5 +1,6 @@
 package com.DOCKin.dto.chat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -18,6 +19,7 @@ import java.util.List;
 @Schema(description = "채팅방 req dto")
 public class ChatRoomRequestDto {
     @Schema(description = "채팅방 이름", requiredMode = Schema.RequiredMode.REQUIRED)
+    @JsonProperty("room_name")
     @NotBlank(message = "채팅방 이름은 필수입니다.")
     private String room_name;
 

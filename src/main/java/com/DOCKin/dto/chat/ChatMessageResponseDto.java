@@ -1,5 +1,6 @@
 package com.DOCKin.dto.chat;
 
+import com.DOCKin.model.Chat.ChatMessages;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,7 @@ public class ChatMessageResponseDto {
     private String senderId;
 
     @Schema(description = "메시지 번호", example = "이건 전역번호로 설정함, 채팅방마다 번호 매기지 x", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String messageId;
+    private Long messageId;
 
     @Schema(description = "보내는 내용")
     private String content;
@@ -38,4 +39,16 @@ public class ChatMessageResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "Asia/Seoul")
     private LocalDateTime sentAt;
 
+
+    public static ChatMessageResponseDto from(ChatMessages entity) {
+        return ChatMessageResponseDto.builder()
+                .roomId(entity.getChatRooms().getRoomId())
+                .senderId(entity.getSenderId())
+                .messageId(entity.getMessageId())
+                .content(entity.getContent())
+                .fileUrl(entity.getFileUrl())
+                .messageType(entity.getMessageType())
+                .sentAt(entity.getSentAt())
+                .build();
+    }
 }

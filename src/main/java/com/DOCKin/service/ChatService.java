@@ -1,6 +1,7 @@
 package com.DOCKin.service;
 
 import com.DOCKin.dto.chat.ChatMessageRequestDto;
+import com.DOCKin.dto.chat.ChatMessageResponseDto;
 import com.DOCKin.model.Chat.ChatMessages;
 import com.DOCKin.model.Chat.ChatRooms;
 import com.DOCKin.repository.Chat.ChatMessagesRepository;
@@ -45,9 +46,10 @@ public class ChatService {
         }
     }
 
-    //이전 채팅 내역 불러오기
+    /*//이전 채팅 내역 불러오기
     @Transactional(readOnly = true)
-    public Slice<ChatMessages> getChatHistory(String roomId, Pageable pageable){
-        return chatMessagesRepository.findByRoomIdOrderByCreatedAtDesc(roomId,pageable);
-    }
+    public Slice<ChatMessageResponseDto> getChatHistory(Integer roomId, Pageable pageable){
+        Slice<ChatMessages> messages = chatMessagesRepository.findByRoomIdOrderByCreatedAtDesc(roomId,pageable);
+        return messages.map(ChatMessageResponseDto::from);
+    }*/
 }
