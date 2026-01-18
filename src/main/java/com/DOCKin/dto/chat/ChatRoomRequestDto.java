@@ -3,7 +3,7 @@ package com.DOCKin.dto.chat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +32,7 @@ public class ChatRoomRequestDto {
     private String creatorId;
 
     @Schema(description = "참가하는 인원의 사원번호", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "최소 한 명 이상의 참가자가 필요합니다.")
+    @Size(min=2, message="채팅방을 생성하려면 본인을 포함해 최소 2명의 참가자가 필요합니다.")
     private List<String> participantIds;
 
 

@@ -65,16 +65,16 @@ public class StompHandler implements ChannelInterceptor {
 
         //2. 사용자가 특정 채팅방에 들어갈 때 발생함
         else if(StompCommand.SUBSCRIBE == accessor.getCommand()){
-            String destination = accessor.getDestination();
+            //String destination = accessor.getDestination();
             String userId = (String) accessor.getSessionAttributes().get("userId");
-            String zoneId = extractZoneId(destination);
+            //String zoneId = extractZoneId(destination);
 
             Member member = memberRepository.findByUserId(userId)
                     .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-            if(!member.getShipYardArea().equals(zoneId)){
+            /*if(!member.getShipYardArea().equals(zoneId)){
                 throw new MessageDeliveryException("해당 구역 채팅방에 접근 권한이 없습니다");
-            }
+            }*/
         }
 
         //연결 해제 시
@@ -86,12 +86,12 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     //구역 번호를 추출
-    public String extractZoneId(String destination){
+    /*public String extractZoneId(String destination){
         if(destination==null || !destination.contains("/sub/zone/")){
             return null;
         }
         return  destination.replace("/sub/zone/","");
-    }
+    }*/
 }
 
 
