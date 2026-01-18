@@ -95,7 +95,9 @@ public class ChatRoomService {
             dto.getRemoveParticipantIds().forEach(removeId->{
                 if(!removeId.equals(rooms.getCreatorId())){
                     chatMembersRepository.deleteByChatRoomsAndMember_UserId(rooms,removeId);
+                    rooms.removeMember(removeId);
                 }
+                rooms.getMembers().removeIf(m -> m.getMember().getUserId().equals(removeId));
             });
             chatMembersRepository.flush();
         }
@@ -108,6 +110,7 @@ public class ChatRoomService {
                     saveMember(rooms,addId);
                 }
             });
+            chatMembersRepository.flush();
         }
 
         long finalMemberCount = chatMembersRepository.countByChatRooms(rooms);

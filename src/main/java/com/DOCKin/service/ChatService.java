@@ -47,9 +47,9 @@ public class ChatService {
     }
 
     //이전 채팅 내역 불러오기
-    /*@Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public Slice<ChatMessageResponseDto> getChatHistory(Integer roomId, Pageable pageable){
-        Slice<ChatMessages> messages = chatMessagesRepository.findByRoomIdOrderByCreatedAtDesc(roomId,pageable);
+        Slice<ChatMessages> messages = chatMessagesRepository.findByChatRooms_RoomIdOrderBySentAtDesc(roomId,pageable);
         return messages.map(ChatMessageResponseDto::from);
-    }*/
+    }
 }

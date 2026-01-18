@@ -59,6 +59,9 @@ public class ChatRooms {
         this.roomName=room_name;
     }
 
+    public void removeMember(String userId){
+        this.members.removeIf(m->m.getMember().getUserId().equals(userId));
+    }
 
 
 }
