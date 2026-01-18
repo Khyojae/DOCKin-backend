@@ -90,6 +90,16 @@ public class ChatRoomService {
             rooms.updateRoomName(dto.getRoom_name());
         }
 
+        //멤버 삭제(방장 제외)
+        if(dto.getRemoveParticipantIds()!=null){
+            dto.getRemoveParticipantIds().forEach(removeId->{
+                if(!removeId.equals(rooms.getCreatorId())){
+                    chatMembersRepository.deleteByChatRoomsAndMember_UserId(rooms,removeId);
+                }
+            });
+            chatMembersRepository.flush();
+        }
+
         //새로운 멤버 추가
         if(dto.getAddParticipantIds()!=null){
             dto.getAddParticipantIds().forEach(addId->{
@@ -100,14 +110,12 @@ public class ChatRoomService {
             });
         }
 
-        //멤버 삭제
-        if(dto.getRemoveParticipantIds()!=null){
-            dto.getRemoveParticipantIds().forEach(removeId->{
-                if(!removeId.equals(rooms.getCreatorId())){
-                    chatMembersRepository.deleteByChatRoomsAndMember_UserId(rooms,removeId);
-                }
-            });
+        long finalMemberCount = chatMembersRepository.countByChatRooms(rooms);
+        if(finalMemberCount<2){
+            throw new IllegalArgumentException("채팅방에서는 최소 2명의 참가자가 있어야 합니다.");
         }
+
+
         return ChatRoomResponseDto.from(rooms);
     }
 

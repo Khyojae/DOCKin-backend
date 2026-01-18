@@ -27,7 +27,8 @@ public class ChatRoomResponseDto {
     @Schema(description = "그룹채팅방인지 그냥 1대1채팅방인지", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean is_group;
 
-    @Schema(description = "참가하는 인원의 사원번호", minLength = 2, requiredMode = Schema.RequiredMode.REQUIRED)    private List<String> participantIds;
+    @Schema(description = "참가하는 인원의 사원번호", minLength = 2, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> participantIds;
 
     @Schema(description = "방장id",requiredMode = Schema.RequiredMode.REQUIRED)
     private String creatorId;
@@ -41,6 +42,8 @@ public class ChatRoomResponseDto {
 
     @Schema(description = "마지막 메시지 시간")
     private LocalDateTime lastMessageAt;
+
+
 
 
     public static ChatRoomResponseDto from(ChatRooms entity){

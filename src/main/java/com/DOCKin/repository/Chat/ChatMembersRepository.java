@@ -15,4 +15,5 @@ boolean existsByChatRoomsAndMember_UserId(ChatRooms chatRooms, String userId);
     @Transactional
     void deleteByChatRoomsAndMember_UserId(ChatRooms chatRooms,String userId);
 
+    long countByChatRooms(ChatRooms rooms);
 }
