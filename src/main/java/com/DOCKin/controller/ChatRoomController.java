@@ -79,10 +79,12 @@ public class ChatRoomController {
         return ResponseEntity.noContent().build();
     }
 
-   /* @Operation(summary="채팅 내역 조회",description = "특정 채팅방의 이전에 보냈던 메시지 조회")
+   @Operation(summary="채팅 내역 조회",description = "특정 채팅방의 이전에 보냈던 메시지 조회")
     @GetMapping("/room/{roomId}/messages")
-    public ResponseEntity<Slice<ChatMessageResponseDto>> getChatMessages(@PathVariable String roomId){
-        return ResponseEntity.ok(Collections.emptyList());
-    } */
+    public ResponseEntity<Slice<ChatMessageResponseDto>> getChatMessages(@PathVariable Integer roomId,
+                                                                         @PageableDefault(size = 20, sort = "sentAt", direction = Sort.Direction.DESC) Pageable pageable){
+       Slice<ChatMessageResponseDto> chatHistory= chatService.getChatHistory(roomId,pageable);
+        return ResponseEntity.ok(chatHistory);
+    }
 
 }
