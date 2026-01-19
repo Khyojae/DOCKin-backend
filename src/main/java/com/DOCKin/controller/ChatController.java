@@ -20,7 +20,10 @@ public class ChatController {
         log.info("메시지 수신: 방번호={}, 보낸이={}, 내용={}",
                 message.getRoomId(),message.getSenderId(),message.getContent());
 
-        messagingTemplate.convertAndSend("/sub/chat/room/"+message.getRoomId());
+        String destination = "/sub/chat/room/" + String.valueOf(message.getRoomId());
+        log.info("==> [발송 경로 확인]: {}", destination);
+
+        messagingTemplate.convertAndSend("/sub/chat/room/"+message.getRoomId(),message);
 
         chatService.saveMessage(message);
     }

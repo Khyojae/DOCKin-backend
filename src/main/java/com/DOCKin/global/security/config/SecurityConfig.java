@@ -11,6 +11,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -43,9 +44,17 @@ public class SecurityConfig {
             "/api/safety/**",
             "/api/work-logs/**",
             "/api/attendance/**",
-            "/api/chat/**"
+            "/api/chat/**",
+            "/ws/**",
+            "/ws-stomp/**"
 
     };
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/ws/**", "/ws-stomp/**", "/favicon.ico");
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtBlacklist jwtBlacklist) throws Exception {
@@ -56,7 +65,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/ws/**", "/ws-stomp/**","/v3/api-docs/**").permitAll()
                 .requestMatchers(AUTH_WHITELIST).permitAll() // 화이트리스트 전체 허용
                 .anyRequest().authenticated());
 
