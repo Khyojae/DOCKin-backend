@@ -97,4 +97,14 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatHistory);
     }
 
+    @Operation(summary ="채팅방에서 특정 키워드 조회")
+    @GetMapping("/room/{roomId}/messages/search")
+    public ResponseEntity<Slice<ChatMessageResponseDto>> searchMessages(@PathVariable Integer roomId,
+                                                                        @RequestParam String keyword,
+                                                                        @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                        @PageableDefault(sort = "messageId", direction = Sort.Direction.DESC) Pageable pageable){
+
+        String userId = customUserDetails.getMember().getUserId();
+        return ResponseEntity.ok(chatService.searchMessage(roomId,userId,keyword,pageable));
+    }
 }

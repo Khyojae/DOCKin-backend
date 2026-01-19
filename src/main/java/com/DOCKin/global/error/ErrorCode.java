@@ -24,7 +24,8 @@ public enum ErrorCode {
 
    // Chat
     CHATROOM_NOT_FOUND(400, "C001", "존재하지 않는 채팅입니다."),
-    CHATROOM_AUTHOR(400, "C002", "채팅방의 권한이 없습니다."),
+    CHATMEMBER_NOT_FOUND(400, "C002", "존재하지 않는 채팅방 멤버입니다."),
+    CHATROOM_AUTHOR(400, "C003", "채팅방의 권한이 없습니다."),
 
 
     // Worklog

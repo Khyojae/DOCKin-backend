@@ -71,8 +71,17 @@ public class ChatService {
 
     //메시지 검색
     @Transactional(readOnly = true)
-    public Slice<ChatMessageResponseDto> searchMessage(Integer roomId, String keyword ,Pageable pageable){
-        return chatMessagesRepository.findByChatRooms_RoomIdAndContentContaining(roomId,keyword,pageable)
-                .map(ChatMessageResponseDto::from);
+    public Slice<ChatMessageResponseDto> searchMessage(Integer roomId, String userId ,String keyword ,Pageable pageable){
+        ChatMembers members = chatMembersRepository.findByChatRooms_RoomIdAndMember_UserId(roomId,userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.CHATMEMBER_NOT_FOUND));
+
+        Slice<ChatMessages> messages = chatMessagesRepository
+                .findByChatRooms_RoomIdAndSentAtAfterAndContentContaining(
+                        roomId,
+                        members.getJoinedAt(), 
+                        keyword,
+                        pageable
+                );
+        return messages.map(ChatMessageResponseDto::from);
     }
 }

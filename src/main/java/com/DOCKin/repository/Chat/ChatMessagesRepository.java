@@ -16,4 +16,10 @@ public interface ChatMessagesRepository extends JpaRepository<ChatMessages,Long>
 
     //메시지 키워드 검색
     Slice<ChatMessages> findByChatRooms_RoomIdAndContentContaining(Integer roomId, String keyword, Pageable pageable);
-}
+
+    Slice<ChatMessages> findByChatRooms_RoomIdAndSentAtAfterAndContentContaining(
+            Integer roomId,
+            LocalDateTime joinedAt,
+            String keyword,
+            Pageable pageable
+    );}
