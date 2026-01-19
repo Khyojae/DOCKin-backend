@@ -1,13 +1,19 @@
 package com.DOCKin.repository.Chat;
 
 import com.DOCKin.model.Chat.ChatMessages;
-import com.DOCKin.model.Chat.ChatRooms;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ChatMessagesRepository extends JpaRepository<ChatMessages,Long> {
+import java.time.LocalDateTime;
 
-    Slice<ChatMessages> findByChatRooms_RoomIdOrderBySentAtDesc(Integer roomId, Pageable pageable);
+public interface ChatMessagesRepository extends JpaRepository<ChatMessages,Long> {
+    //과거 채팅 내역 조회
+    Slice<ChatMessages> findByChatRooms_RoomIdAndSentAtAfterOrderBySentAtDesc(Integer roomId, LocalDateTime joinedAt, Pageable pageable);
+
+    //채팅방 입장 시, 최신 채팅 내역 조회
+    Slice<ChatMessages> findByChatRooms_RoomIdAndSentAtAfterAndMessageIdLessThanOrderByMessageIdDesc(Integer roomId, LocalDateTime joinedAt, Long lastId, Pageable pageable);
+
+    //메시지 키워드 검색
+    Slice<ChatMessages> findByChatRooms_RoomIdAndContentContaining(Integer roomId, String keyword, Pageable pageable);
 }
