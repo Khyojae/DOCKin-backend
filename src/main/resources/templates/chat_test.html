@@ -3,130 +3,180 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>STOMP Test (JWT Auth)</title>
+    <title>DOCKin Messenger Test</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .room-item { cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s; }
+        .room-item:hover { background-color: #f8f9fa; }
+        .room-item.active { background-color: #e9ecef; border-left: 5px solid #0d6efd; }
+        #messageBox { background-color: #f1f3f5; border-radius: 10px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+        .msg-time { font-size: 0.7rem; color: #888; display: block; margin-top: 2px; }
+        .alert { border-radius: 15px; }
+    </style>
 
     <script type="text/javascript">
         let stompClient;
         let subscriptions = {};
+        let currentRoomId = null;
+        const SERVER_URL = "http://localhost:8080";
 
-        function connectWebSocket() {
+        // 1. 연결 및 토큰 설정
+        function connect() {
             const url = $('#websocketUrl').val();
-            const jwtToken = $('#jwtToken').val(); // 추가됨
+            const jwtToken = $('#jwtToken').val();
+            if (!jwtToken) return alert("토큰을 입력하세요.");
 
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + jwtToken;
             stompClient = Stomp.client(url);
 
-            // 헤더에 토큰을 실어서 보냄
-            const headers = {
-                'token': jwtToken
+            stompClient.connect({'token': jwtToken}, () => {
+                alert('연결 성공!');
+                loadMyRooms();
+            }, (e) => alert('연결 실패: ' + e));
+        }
+
+        // 2. 방 목록 불러오기 (DTO 필드명 수정: room_Id, lastMessageContent)
+        function loadMyRooms() {
+            axios.get(`${SERVER_URL}/api/chat/rooms`)
+                .then(res => {
+                    const rooms = res.data.content;
+                    const list = $('#roomList').empty();
+                    rooms.forEach(room => {
+                        // 중요: DTO 필드명 매칭 (room_Id 의 I가 대문자임에 주의)
+                        const rId = room.room_Id;
+                        const rName = room.room_name;
+                        const lastMsg = room.lastMessageContent || '대화 내역이 없습니다.';
+
+                        const html = `
+                            <div class="room-item p-3" onclick="enterRoom(${rId}, '${rName}')" id="room-${rId}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="text-primary">${rName}</strong>
+                                    <span class="badge bg-light text-dark border">${room.is_group ? '그룹' : '1:1'}</span>
+                                </div>
+                                <div class="text-truncate small text-muted mt-1">${lastMsg}</div>
+                            </div>`;
+                        list.append(html);
+                    });
+                }).catch(e => console.error("목록 로드 실패", e));
+        }
+
+        // 3. 채팅방 입장
+        function enterRoom(roomId, roomName) {
+            console.log("입장 시도 - 방ID:", roomId);
+            if(!roomId || roomId === 'undefined') {
+                alert("방 번호를 찾을 수 없습니다.");
+                return;
+            }
+
+            currentRoomId = roomId;
+            $('.room-item').removeClass('active');
+            $(`#room-${roomId}`).addClass('active');
+            $('#currentRoomTitle').text(roomName + ` (방번호: ${roomId})`);
+            $('#messageBox').empty();
+
+            // 기존 구독 해제
+            Object.keys(subscriptions).forEach(p => {
+                subscriptions[p].unsubscribe();
+                delete subscriptions[p];
+            });
+
+            // 웹소켓 구독
+            const subPath = `/sub/chat/room/${roomId}`;
+            subscriptions[subPath] = stompClient.subscribe(subPath, (data) => {
+                displayMessage(data.body, false);
+            });
+
+            // 과거 내역 로드 (여기서 400 에러 나던 부분 해결)
+            axios.get(`${SERVER_URL}/api/chat/room/${roomId}/messages`)
+                .then(res => {
+                    const history = res.data.content;
+                    if(history) {
+                        history.reverse().forEach(msg => displayMessage(JSON.stringify(msg), true));
+                    }
+                }).catch(e => console.error("내역 로드 실패", e));
+        }
+
+        // 4. 메시지 전송
+        function sendMessage() {
+            const content = $('#messageInput').val();
+            if (!currentRoomId || !content) return;
+
+            const payload = {
+                roomId: currentRoomId,
+                content: content
             };
 
-            stompClient.connect(headers, stompConnectHandler, stompErrorHandler);
+            stompClient.send("/pub/chat/message", {}, JSON.stringify(payload));
+            $('#messageInput').val('');
         }
 
-        function stompConnectHandler() {
-            console.log('connected!');
-            alert('웹소켓 연결 성공!');
-        }
-
-        function stompErrorHandler(e) {
-            console.error('stomp connect error - ', e);
-            alert('연결 실패! 콘솔 로그를 확인하세요.');
-        }
-
-        function subscribeToPath(path) {
-            const subscription = stompClient.subscribe(path, (data) => {
-                displayMessage(data.body);
-            });
-            subscriptions[path] = subscription;
-        }
-
-        function unsubscribeFromPath(path) {
-            if (subscriptions[path]) {
-                subscriptions[path].unsubscribe();
-                delete subscriptions[path];
+        function displayMessage(raw, isHistory) {
+            let data;
+            try {
+                data = JSON.parse(raw);
+            } catch(e) {
+                data = { senderId: 'System', content: raw };
             }
+
+            const alertClass = isHistory ? 'alert-secondary text-muted' : 'alert-info';
+            const html = `
+                <div class="mb-3 px-2">
+                    <div class="alert ${alertClass} d-inline-block py-2 px-3 mb-0" style="max-width: 85%; border: none;">
+                        <b style="font-size:0.85rem; display:block; margin-bottom:2px;">${data.senderId || '알 수 없음'}</b>
+                        <span>${data.content}</span>
+                    </div>
+                    <span class="msg-time px-1">${data.sentAt || ''}</span>
+                </div>`;
+            $('#messageBox').append(html);
+            $('#messageBox').scrollTop($('#messageBox')[0].scrollHeight);
         }
 
-        function displayMessage(messageData) {
-            const messageBox = $('#messageBox');
-            messageBox.append(`<div class="alert alert-info">${messageData}</div>`);
-            messageBox.scrollTop(messageBox[0].scrollHeight);
-        }
-
-        $(function () {
-            $('#connectBtn').click(connectWebSocket);
-
-            $('#addSubscriptionBtn').click(function () {
-                const count = $('#subscriptionList .subscription-form').length;
-                const form = `
-                    <div class="mb-3 input-group subscription-form" id="subscription-${count}" style="width: 500px;">
-                        <input type="text" class="form-control" placeholder="SUB PATH" id="path-${count}" />
-                        <button class="btn btn-primary subscribeBtn">SUB</button>
-                        <button class="btn btn-danger unsubscribeBtn" style="display: none;">UNSUB</button>
-                    </div>`;
-                $('#subscriptionList').append(form);
-            });
-
-            $(document).on('click', '.subscribeBtn', function () {
-                const inputField = $(this).siblings('input');
-                const path = inputField.val();
-                subscribeToPath(path);
-                inputField.prop('disabled', true);
-                $(this).hide().siblings('.unsubscribeBtn').show();
-            });
-
-            $(document).on('click', '.unsubscribeBtn', function () {
-                const inputField = $(this).siblings('input');
-                unsubscribeFromPath(inputField.val());
-                inputField.prop('disabled', false);
-                $(this).hide().siblings('.subscribeBtn').show();
-            });
-
-            $('#sendBtn').click(function () {
-                const path = $('#destinationPath').val();
-                const messageJson = $('#message').val();
-                try {
-                    stompClient.send(path, {}, messageJson);
-                } catch (error) {
-                    alert('전송 에러!');
-                }
-            });
+        $(function() {
+            $('#messageInput').keypress(e => { if(e.which == 13) sendMessage(); });
         });
     </script>
 </head>
-<body>
+<body class="bg-light">
 <div class="container py-4">
-    <h1>WebSocket CONNECT</h1>
-    <div class="mb-3" style="width: 500px;">
-        <label class="form-label">URL</label>
-        <div class="input-group mb-2">
-            <input type="text" id="websocketUrl" class="form-control" value="ws://localhost:8080/ws"/>
-        </div>
-        <label class="form-label">TOKEN (JWT - Bearer 제외하고 입력)</label>
-        <div class="input-group">
-            <input type="text" id="jwtToken" class="form-control" placeholder="Postman에서 복사한 토큰 입력"/>
-            <button id="connectBtn" class="btn btn-primary">CONN</button>
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-0">
+            <div class="row g-0">
+                <div class="col-md-4 border-end" style="height: 850px; display: flex; flex-direction: column; background: white;">
+                    <div class="p-3 bg-primary text-white shadow-sm">
+                        <h5 class="mb-0">DOCKin 채팅 목록</h5>
+                    </div>
+                    <div class="p-3 border-bottom bg-light">
+                        <label class="small fw-bold text-muted mb-1">JWT 인증 토큰</label>
+                        <input type="text" id="jwtToken" class="form-control form-control-sm mb-2" placeholder="Bearer 제외 입력">
+                        <input type="hidden" id="websocketUrl" value="ws://localhost:8080/ws">
+                        <button class="btn btn-dark btn-sm w-100" onclick="connect()">서버 연결 및 목록 로드</button>
+                    </div>
+                    <div id="roomList" class="overflow-auto flex-grow-1">
+                        <div class="text-center p-5 text-muted">연결 버튼을 누르면<br>채팅방 목록이 나타납니다.</div>
+                    </div>
+                </div>
+
+                <div class="col-md-8 d-flex flex-column" style="height: 850px; background: #f8f9fa;">
+                    <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center shadow-sm" style="z-index: 10;">
+                        <h6 id="currentRoomTitle" class="mb-0 fw-bold">방을 선택해주세요</h6>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="loadMyRooms()">새로고침</button>
+                    </div>
+
+                    <div id="messageBox" class="flex-grow-1 p-4 overflow-auto"></div>
+
+                    <div class="p-3 bg-white border-top">
+                        <div class="input-group shadow-sm">
+                            <input type="text" id="messageInput" class="form-control border-0 bg-light" placeholder="메시지를 입력하세요..." style="padding: 12px;">
+                            <button class="btn btn-primary px-4" onclick="sendMessage()">전송</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <hr>
-    <h2>SUBSCRIBE</h2>
-    <div id="subscriptionList"></div>
-    <button id="addSubscriptionBtn" class="btn btn-secondary mb-3">ADD</button>
-
-    <hr>
-    <h2>SEND MESSAGE</h2>
-    <div class="mb-3">
-        <input type="text" id="destinationPath" class="form-control mb-2" placeholder="/pub/chat/message"/>
-        <textarea id="message" class="form-control" rows="3">{"roomId":"6", "senderId":"1001", "content":"안녕하세요!"}</textarea>
-    </div>
-    <button id="sendBtn" class="btn btn-success">SEND</button>
-
-    <h2 class="mt-4">MESSAGES</h2>
-    <div id="messageBox" class="border p-3 bg-light" style="height: 300px; overflow-y: auto;"></div>
 </div>
 </body>
 </html>
