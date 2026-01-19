@@ -136,6 +136,18 @@ public class ChatRoomService {
         chatRoomsRepository.delete(chatRooms);
     }
 
+    //채팅방 나가기 (한명만)
+    @Transactional
+    public void leaveChatRoom(Integer chatRoomId, String userId){
+        ChatRooms room = chatRoomsRepository.findById(chatRoomId)
+                .orElseThrow(()->new BusinessException(ErrorCode.CHATROOM_NOT_FOUND));
+        chatMembersRepository.deleteByChatRoomsAndMember_UserId(room,userId);
+        long memberCount = chatMembersRepository.countByChatRooms(room);
+        if(memberCount==0){
+            chatRoomsRepository.delete(room);
+        }
+    }
+
     //멤버 초대
     private void saveMember(ChatRooms rooms, String userId){
         Member memberEntity = memberRepository.findById(userId)
