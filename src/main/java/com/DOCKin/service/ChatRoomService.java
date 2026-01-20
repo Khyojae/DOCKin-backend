@@ -93,7 +93,7 @@ public class ChatRoomService {
         ChatMembers participant = chatMembersRepository.findByChatRooms_RoomIdAndMember_UserId(roomId, userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.CHATMEMBER_NOT_FOUND));
 
-        participant.updateLastReadTime();
+        participant.updateLastReadTime(LocalDateTime.now());
 
         return  ChatRoomResponseDto.from(rooms,0L);
     }
