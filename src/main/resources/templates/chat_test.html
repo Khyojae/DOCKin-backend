@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>DOCKin Messenger Test Final (Fixed)</title>
+    <title>DOCKin Chat - Security Fixed</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -24,13 +24,29 @@
         let stompClient;
         let subscriptions = {};
         let currentRoomId = null;
+        let currentUserId = "1001"; // 테스트를 위해 변수로 관리 (로그인 로직에 따라 변경)
         const SERVER_URL = "http://localhost:8080";
 
-        // 1. 서버 연결 및 JWT 설정
+        // 1. 서버 연결 (초기화 로직 포함)
         function connect() {
             const url = $('#websocketUrl').val();
             const jwtToken = $('#jwtToken').val();
             if (!jwtToken) return alert("JWT 토큰을 입력하세요.");
+
+            // [보안/기능 핵심] 다른 유저로 전환 시 기존 화면과 구독을 모두 초기화합니다.
+            $('#roomList').empty();
+            $('#messageBox').empty();
+            $('#currentRoomTitle').text("방을 선택하세요");
+            $('#chatHeaderActions').hide();
+            currentRoomId = null;
+
+            if (stompClient) {
+                Object.keys(subscriptions).forEach(path => {
+                    subscriptions[path].unsubscribe();
+                    delete subscriptions[path];
+                });
+                stompClient.disconnect();
+            }
 
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + jwtToken;
 
@@ -65,95 +81,67 @@
                             </div>`;
                         list.append(html);
                     });
-                }).catch(e => alert("방 목록 로드 실패: " + e));
+                }).catch(e => {
+                alert("방 목록 로드 실패");
+                console.error(e);
+            });
         }
 
-        // 3. 채팅방 입장 및 내역 로드
+        // 3. 채팅방 입장 (보안 검증 포함)
         function enterRoom(roomId, roomName) {
-            currentRoomId = roomId;
-            $('#searchKeyword').val('');
-            $('.room-item').removeClass('active');
-            $(`#room-${roomId}`).addClass('active');
-            $('#currentRoomTitle').text(roomName);
-            $('#messageBox').empty();
-            $('#chatHeaderActions').show();
-
+            // 방 이동 전 기존 구독 해제
             Object.keys(subscriptions).forEach(path => {
                 subscriptions[path].unsubscribe();
                 delete subscriptions[path];
             });
 
-            const subPath = `/sub/chat/room/${roomId}`;
-            subscriptions[subPath] = stompClient.subscribe(subPath, (data) => {
-                displayMessage(data.body, false);
-            });
+            // 백엔드의 getChatRoomsInfo(userId, roomId)가 검증을 수행함
+            axios.get(`${SERVER_URL}/api/chat/room/${roomId}`)
+                .then(res => {
+                    // 성공적으로 데이터를 가져왔다면 (내 방이라면) 입장 처리
+                    currentRoomId = roomId;
+                    $('.room-item').removeClass('active');
+                    $(`#room-${roomId}`).addClass('active');
+                    $('#currentRoomTitle').text(roomName);
+                    $('#messageBox').empty();
+                    $('#chatHeaderActions').show();
 
-            loadMessages(roomId);
+                    const subPath = `/sub/chat/room/${roomId}`;
+                    subscriptions[subPath] = stompClient.subscribe(subPath, (data) => {
+                        displayMessage(data.body, false);
+                    });
+
+                    loadMessages(roomId);
+                })
+                .catch(err => {
+                    // 내 방이 아니면 백엔드에서 에러를 던짐 (ErrorCode.CHATROOM_AUTHOR)
+                    alert("해당 채팅방에 접근 권한이 없습니다.");
+                    $('#currentRoomTitle').text("접근 불가");
+                    $('#messageBox').empty();
+                    console.error(err);
+                });
         }
 
         function loadMessages(roomId) {
-            if(!roomId) return;
             axios.get(`${SERVER_URL}/api/chat/room/${roomId}/messages`)
                 .then(res => {
                     const history = res.data.content;
-                    $('#messageBox').empty();
                     if(history && history.length > 0) {
                         history.reverse().forEach(msg => displayMessage(msg, true));
-                    } else {
-                        $('#messageBox').append('<div class="text-center text-muted my-5">이전 대화가 없습니다.</div>');
                     }
                 }).catch(e => console.error("내역 로드 실패", e));
         }
 
-        // 4. 채팅방 나가기
-        function leaveRoom() {
-            if(!currentRoomId) return;
-            if(!confirm("정말 이 채팅방을 나가시겠습니까?")) return;
-
-            axios.delete(`${SERVER_URL}/api/chat/room/leave/${currentRoomId}`)
-                .then(res => {
-                    alert("방에서 나갔습니다.");
-                    const subPath = `/sub/chat/room/${currentRoomId}`;
-                    if(subscriptions[subPath]) {
-                        subscriptions[subPath].unsubscribe();
-                        delete subscriptions[subPath];
-                    }
-                    currentRoomId = null;
-                    $('#currentRoomTitle').text("방을 선택하세요");
-                    $('#messageBox').empty();
-                    $('#chatHeaderActions').hide();
-                    loadMyRooms();
-                }).catch(e => alert("방 나가기 실패"));
-        }
-
-        // 5. 메시지 검색
-        function searchMessages() {
-            const keyword = $('#searchKeyword').val();
-            if (!currentRoomId) return alert("방을 먼저 선택해주세요.");
-            if (!keyword) return loadMessages(currentRoomId);
-
-            axios.get(`${SERVER_URL}/api/chat/room/${currentRoomId}/messages/search`, {
-                params: { keyword: keyword }
-            })
-                .then(res => {
-                    const results = res.data.content;
-                    $('#messageBox').empty();
-                    $('#messageBox').append(`<div class="text-center small text-primary fw-bold my-3">🔍 '${keyword}' 검색 결과 (${results.length}건)</div>`);
-                    results.forEach(msg => displayMessage(msg, true));
-                }).catch(e => alert("검색 실패"));
-        }
-
-        // 6. 메시지 전송 (DTO 양식 준수)
+        // 4. 메시지 전송
         function sendMessage() {
             const content = $('#messageInput').val();
             if (!currentRoomId || !content) return;
 
-            // ChatMessageRequestDto 양식에 맞춘 데이터
             const payload = {
                 roomId: currentRoomId,
-                senderId: "1001", // 테스트용 사번 (실제 로그인 유저 정보로 변경 필요)
+                senderId: "1001", // 실제 배포 시에는 로그인한 사번을 동적으로 주입
                 content: content,
-                messageType: "TEXT", // 필수 값
+                messageType: "TEXT",
                 fileUrl: ""
             };
 
@@ -161,19 +149,16 @@
             $('#messageInput').val('');
         }
 
-        // 7. 메시지 표시 (필드 매칭 수정)
         function displayMessage(raw, isHistory) {
             let data;
             try {
-                // 이미 객체면 그대로, 문자열이면 JSON 파싱
                 data = (typeof raw === 'string') ? JSON.parse(raw) : raw;
             } catch(e) {
                 data = { senderId: 'System', content: raw };
             }
 
-            // DOCKin 백엔드 필드명에 맞춰 매칭 (senderId, content, sentAt 등)
             const sender = data.senderId || '알 수 없음';
-            const content = data.content || '내용 없음';
+            const content = data.content || '';
             const time = data.sentAt || '';
 
             const alertClass = isHistory ? 'alert-secondary text-muted' : 'alert-info shadow-sm';
@@ -191,7 +176,6 @@
 
         $(function() {
             $('#messageInput').keypress(e => { if(e.which == 13) sendMessage(); });
-            $('#searchKeyword').keypress(e => { if(e.which == 13) searchMessages(); });
             $('#chatHeaderActions').hide();
         });
     </script>
@@ -216,22 +200,11 @@
 
                 <div class="col-md-8 d-flex flex-column" style="height: 800px; background: #fdfdfd;">
                     <div class="p-3 border-bottom bg-white shadow-sm" style="z-index: 10;">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
                             <h6 id="currentRoomTitle" class="mb-0 fw-bold text-dark">방을 선택하세요</h6>
                             <div id="chatHeaderActions">
-                                <button class="btn btn-sm btn-outline-danger border-0 fw-bold me-2" onclick="leaveRoom()">
-                                    <i class="bi bi-box-arrow-right"></i> 나가기
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary border-0" onclick="loadMyRooms()">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </button>
+                                <button class="btn btn-sm btn-outline-danger border-0 fw-bold" onclick="leaveRoom()">나기기</button>
                             </div>
-                        </div>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
-                            <input type="text" id="searchKeyword" class="form-control border-0 bg-light" placeholder="채팅 내용 검색 (Enter)">
-                            <button class="btn btn-outline-primary border-0 fw-bold" onclick="searchMessages()">검색</button>
-                            <button class="btn btn-outline-danger border-0 fw-bold" onclick="loadMessages(currentRoomId)">취소</button>
                         </div>
                     </div>
 

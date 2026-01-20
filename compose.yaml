@@ -5,8 +5,11 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
+    environment:
+      - TZ=Asia/Seoul
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - dockin-app
     networks:
@@ -23,7 +26,11 @@ services:
       - "8080:8080"
     environment:
       - DB_HOST=DOCKin-DB
-      - SPRING_PROFILES_ACTIVE=secret  # secret 프로필을 활성화하여 .env 값을 주입받음
+      - SPRING_PROFILES_ACTIVE=secret
+      - TZ=Asia/Seoul
+      - RACK_ENV=development
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       DOCKin-DB:
         condition: service_healthy
@@ -33,13 +40,19 @@ services:
   DOCKin-DB:
     image: mysql:8.0.44
     container_name: dockin-db
+    command:
+      - --default-time-zone=+09:00
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: "dockindb"
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=dockindb
+      - TZ=Asia/Seoul
     ports:
       - "3306:3306"
     volumes:
       - dockin_db_data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
       timeout: 5s
