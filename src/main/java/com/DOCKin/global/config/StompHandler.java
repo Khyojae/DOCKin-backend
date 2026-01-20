@@ -35,6 +35,7 @@ public class StompHandler implements ChannelInterceptor {
         if (StompCommand.CONNECT == accessor.getCommand()) {
             // 헤더에서 'token' 값을 읽어옴
             String token = accessor.getFirstNativeHeader("token");
+
             log.info("WebSocket 연결 시도 - 수신 토큰: [{}]", token);
 
             try {

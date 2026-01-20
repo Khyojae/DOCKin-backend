@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>DOCKin Chat - Security Fixed</title>
+    <title>DOCKin Chat - User Fix</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -24,16 +24,22 @@
         let stompClient;
         let subscriptions = {};
         let currentRoomId = null;
-        let currentUserId = "1001"; // 테스트를 위해 변수로 관리 (로그인 로직에 따라 변경)
+        let currentUserId = ""; // [수정] 고정값 제거, 로그인 시 설정됨
         const SERVER_URL = "http://localhost:8080";
 
         // 1. 서버 연결 (초기화 로직 포함)
         function connect() {
             const url = $('#websocketUrl').val();
             const jwtToken = $('#jwtToken').val();
-            if (!jwtToken) return alert("JWT 토큰을 입력하세요.");
+            const inputUserId = $('#inputUserId').val(); // [추가] 사번 입력값 가져오기
 
-            // [보안/기능 핵심] 다른 유저로 전환 시 기존 화면과 구독을 모두 초기화합니다.
+            if (!jwtToken) return alert("JWT 토큰을 입력하세요.");
+            if (!inputUserId) return alert("로그인할 사번을 입력하세요.");
+
+            // [수정] 현재 로그인한 유저 아이디 업데이트
+            currentUserId = inputUserId;
+
+            // 화면 초기화
             $('#roomList').empty();
             $('#messageBox').empty();
             $('#currentRoomTitle').text("방을 선택하세요");
@@ -52,7 +58,7 @@
 
             stompClient = Stomp.client(url);
             stompClient.connect({'token': jwtToken}, () => {
-                alert('연결 성공!');
+                alert(currentUserId + ' 유저로 연결 성공!'); // 알림창에 접속 사번 표시
                 loadMyRooms();
             }, (e) => alert('연결 실패: ' + e));
         }
@@ -87,18 +93,15 @@
             });
         }
 
-        // 3. 채팅방 입장 (보안 검증 포함)
+        // 3. 채팅방 입장
         function enterRoom(roomId, roomName) {
-            // 방 이동 전 기존 구독 해제
             Object.keys(subscriptions).forEach(path => {
                 subscriptions[path].unsubscribe();
                 delete subscriptions[path];
             });
 
-            // 백엔드의 getChatRoomsInfo(userId, roomId)가 검증을 수행함
             axios.get(`${SERVER_URL}/api/chat/room/${roomId}`)
                 .then(res => {
-                    // 성공적으로 데이터를 가져왔다면 (내 방이라면) 입장 처리
                     currentRoomId = roomId;
                     $('.room-item').removeClass('active');
                     $(`#room-${roomId}`).addClass('active');
@@ -114,10 +117,7 @@
                     loadMessages(roomId);
                 })
                 .catch(err => {
-                    // 내 방이 아니면 백엔드에서 에러를 던짐 (ErrorCode.CHATROOM_AUTHOR)
                     alert("해당 채팅방에 접근 권한이 없습니다.");
-                    $('#currentRoomTitle').text("접근 불가");
-                    $('#messageBox').empty();
                     console.error(err);
                 });
         }
@@ -132,14 +132,14 @@
                 }).catch(e => console.error("내역 로드 실패", e));
         }
 
-        // 4. 메시지 전송
+        // 4. 메시지 전송 [핵심 수정]
         function sendMessage() {
             const content = $('#messageInput').val();
             if (!currentRoomId || !content) return;
 
             const payload = {
                 roomId: currentRoomId,
-                senderId: "1001", // 실제 배포 시에는 로그인한 사번을 동적으로 주입
+                senderId: currentUserId, // [수정] 1001 대신 실제 로그인한 사번(7 등) 사용
                 content: content,
                 messageType: "TEXT",
                 fileUrl: ""
@@ -161,9 +161,11 @@
             const content = data.content || '';
             const time = data.sentAt || '';
 
-            const alertClass = isHistory ? 'alert-secondary text-muted' : 'alert-info shadow-sm';
+            const alertClass = (sender == currentUserId) ? 'alert-primary shadow-sm' : 'alert-light border'; // 내 메시지 색깔 구분
+            const textAlign = (sender == currentUserId) ? 'text-end' : 'text-start';
+
             const html = `
-                <div class="mb-3 px-2 text-start">
+                <div class="mb-3 px-2 ${textAlign}">
                     <div class="alert ${alertClass} d-inline-block py-2 px-3 mb-0" style="max-width: 85%;">
                         <b style="font-size:0.75rem; display:block; margin-bottom:2px; color:#555;">${sender}</b>
                         <span style="font-size:0.95rem;">${content}</span>
@@ -190,8 +192,12 @@
                         <h5 class="mb-0 fw-bold"><i class="bi bi-chat-dots-fill me-2"></i>DOCKin Chat</h5>
                     </div>
                     <div class="p-3 border-bottom bg-light">
+                        <label class="small fw-bold text-muted mb-1">내 사번 (로그인 ID)</label>
+                        <input type="text" id="inputUserId" class="form-control form-control-sm mb-2" placeholder="예: 7">
+
                         <label class="small fw-bold text-muted mb-1">JWT 인증 토큰</label>
                         <textarea id="jwtToken" class="form-control form-control-sm mb-2" rows="2" placeholder="Bearer 제외 입력"></textarea>
+
                         <button class="btn btn-dark btn-sm w-100 fw-bold" onclick="connect()">서버 연결 및 로그인</button>
                         <input type="hidden" id="websocketUrl" value="ws://localhost:8080/ws">
                     </div>
@@ -203,7 +209,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 id="currentRoomTitle" class="mb-0 fw-bold text-dark">방을 선택하세요</h6>
                             <div id="chatHeaderActions">
-                                <button class="btn btn-sm btn-outline-danger border-0 fw-bold" onclick="leaveRoom()">나기기</button>
+                                <button class="btn btn-sm btn-outline-danger border-0 fw-bold">나가기</button>
                             </div>
                         </div>
                     </div>
