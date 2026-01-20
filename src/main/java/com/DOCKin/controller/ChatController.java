@@ -19,6 +19,7 @@ public class ChatController {
     @MessageMapping("/chat/message")
     public void message(ChatMessageRequestDto message, SimpMessageHeaderAccessor headerAccessor){
 
+        //세션에서 인증된 실제 userId 추출
         if (headerAccessor.getSessionAttributes() != null) {
             String actualUserId = (String) headerAccessor.getSessionAttributes().get("userId");
             if (actualUserId != null) {
@@ -34,6 +35,9 @@ public class ChatController {
         log.info("==> [발송 경로 확인]: {}", destination);
 
         messagingTemplate.convertAndSend("/sub/chat/room/"+message.getRoomId(),message);
+        messagingTemplate.convertAndSend("/sub/chat/rooms/update", message);
         chatService.saveMessage(message);
     }
+
+
 }
