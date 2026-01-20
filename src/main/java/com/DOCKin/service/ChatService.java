@@ -57,15 +57,12 @@ public class ChatService {
        ChatMembers memberInfo = chatMembersRepository.findByChatRooms_RoomIdAndMember_UserId(roomId,userId)
                .orElseThrow(()->new BusinessException(ErrorCode.CHATROOM_NOT_FOUND));
 
-       LocalDateTime joinedAt = memberInfo.getJoinedAt();
-
-       Slice<ChatMessages> messages;
-
-       if(lastMessageId==null){
-           messages=chatMessagesRepository.findByChatRooms_RoomIdAndSentAtAfterOrderBySentAtDesc(roomId,joinedAt,pageable);
-       }else{
-           messages=chatMessagesRepository.findByChatRooms_RoomIdAndSentAtAfterAndMessageIdLessThanOrderByMessageIdDesc(roomId,joinedAt,lastMessageId,pageable);
-       }
+       Slice<ChatMessages> messages = chatMessagesRepository.findChatHistory(
+               roomId,
+               memberInfo.getJoinedAt(),
+               lastMessageId,
+               pageable
+       );
         return messages.map(ChatMessageResponseDto::from);
     }
 
@@ -76,9 +73,9 @@ public class ChatService {
                 .orElseThrow(()->new BusinessException(ErrorCode.CHATMEMBER_NOT_FOUND));
 
         Slice<ChatMessages> messages = chatMessagesRepository
-                .findByChatRooms_RoomIdAndSentAtAfterAndContentContaining(
+                .searchMessageByKeyword(
                         roomId,
-                        members.getJoinedAt(), 
+                        members.getJoinedAt(),
                         keyword,
                         pageable
                 );

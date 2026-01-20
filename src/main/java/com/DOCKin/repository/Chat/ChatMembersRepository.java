@@ -17,4 +17,5 @@ boolean existsByChatRoomsAndMember_UserId(ChatRooms chatRooms, String userId);
     long countByChatRooms(ChatRooms rooms);
 
     Optional<ChatMembers> findByChatRooms_RoomIdAndMember_UserId(Integer roomId, String userId);
-}
+
+    boolean existsByChatRooms_RoomIdAndMember_UserId(Integer roomId, String userId);}

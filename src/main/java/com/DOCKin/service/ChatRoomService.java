@@ -65,12 +65,30 @@ public class ChatRoomService {
 
     //특정 채팅방 목록 가져오기
     @Transactional(readOnly = true)
-    public ChatRoomResponseDto getChatRoomsInfo(Integer roomId){
+    public ChatRoomResponseDto getChatRoomsInfo(String userId,Integer roomId){
+
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+
+        validChatRoomMember(userId,roomId);
 
         ChatRooms rooms = chatRoomsRepository.findById(roomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.CHATROOM_NOT_FOUND));
 
+
         return  ChatRoomResponseDto.from(rooms);
+    }
+
+    //유저가 채팅방 멤버인지 입증
+    @Transactional(readOnly = true)
+    public void validChatRoomMember(String userId, Integer roomId){
+
+        boolean isMember = chatMembersRepository.existsByChatRooms_RoomIdAndMember_UserId(roomId, userId);
+        if(!isMember){
+            throw new BusinessException(ErrorCode.CHATROOM_AUTHOR);
+        }
+
     }
 
 

@@ -3,8 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>DOCKin Messenger Test</title>
+    <title>DOCKin Messenger Test Final (Fixed)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -14,7 +15,9 @@
         .room-item.active { background-color: #e9ecef; border-left: 5px solid #0d6efd; }
         #messageBox { background-color: #f1f3f5; border-radius: 10px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
         .msg-time { font-size: 0.7rem; color: #888; display: block; margin-top: 2px; }
-        .alert { border-radius: 15px; }
+        .alert { border-radius: 15px; border: none !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 
     <script type="text/javascript">
@@ -23,33 +26,35 @@
         let currentRoomId = null;
         const SERVER_URL = "http://localhost:8080";
 
-        // 1. 연결 및 토큰 설정
+        // 1. 서버 연결 및 JWT 설정
         function connect() {
             const url = $('#websocketUrl').val();
             const jwtToken = $('#jwtToken').val();
-            if (!jwtToken) return alert("토큰을 입력하세요.");
+            if (!jwtToken) return alert("JWT 토큰을 입력하세요.");
 
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + jwtToken;
-            stompClient = Stomp.client(url);
 
+            stompClient = Stomp.client(url);
             stompClient.connect({'token': jwtToken}, () => {
                 alert('연결 성공!');
                 loadMyRooms();
             }, (e) => alert('연결 실패: ' + e));
         }
 
-        // 2. 방 목록 불러오기 (DTO 필드명 수정: room_Id, lastMessageContent)
+        // 2. 내 채팅방 목록 로드
         function loadMyRooms() {
             axios.get(`${SERVER_URL}/api/chat/rooms`)
                 .then(res => {
                     const rooms = res.data.content;
                     const list = $('#roomList').empty();
+                    if(!rooms || rooms.length === 0) {
+                        list.append('<div class="text-center p-5 text-muted">참여 중인 방이 없습니다.</div>');
+                        return;
+                    }
                     rooms.forEach(room => {
-                        // 중요: DTO 필드명 매칭 (room_Id 의 I가 대문자임에 주의)
                         const rId = room.room_Id;
                         const rName = room.room_name;
                         const lastMsg = room.lastMessageContent || '대화 내역이 없습니다.';
-
                         const html = `
                             <div class="room-item p-3" onclick="enterRoom(${rId}, '${rName}')" id="room-${rId}">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -60,75 +65,125 @@
                             </div>`;
                         list.append(html);
                     });
-                }).catch(e => console.error("목록 로드 실패", e));
+                }).catch(e => alert("방 목록 로드 실패: " + e));
         }
 
-        // 3. 채팅방 입장
+        // 3. 채팅방 입장 및 내역 로드
         function enterRoom(roomId, roomName) {
-            console.log("입장 시도 - 방ID:", roomId);
-            if(!roomId || roomId === 'undefined') {
-                alert("방 번호를 찾을 수 없습니다.");
-                return;
-            }
-
             currentRoomId = roomId;
+            $('#searchKeyword').val('');
             $('.room-item').removeClass('active');
             $(`#room-${roomId}`).addClass('active');
-            $('#currentRoomTitle').text(roomName + ` (방번호: ${roomId})`);
+            $('#currentRoomTitle').text(roomName);
             $('#messageBox').empty();
+            $('#chatHeaderActions').show();
 
-            // 기존 구독 해제
-            Object.keys(subscriptions).forEach(p => {
-                subscriptions[p].unsubscribe();
-                delete subscriptions[p];
+            Object.keys(subscriptions).forEach(path => {
+                subscriptions[path].unsubscribe();
+                delete subscriptions[path];
             });
 
-            // 웹소켓 구독
             const subPath = `/sub/chat/room/${roomId}`;
             subscriptions[subPath] = stompClient.subscribe(subPath, (data) => {
                 displayMessage(data.body, false);
             });
 
-            // 과거 내역 로드 (여기서 400 에러 나던 부분 해결)
+            loadMessages(roomId);
+        }
+
+        function loadMessages(roomId) {
+            if(!roomId) return;
             axios.get(`${SERVER_URL}/api/chat/room/${roomId}/messages`)
                 .then(res => {
                     const history = res.data.content;
-                    if(history) {
-                        history.reverse().forEach(msg => displayMessage(JSON.stringify(msg), true));
+                    $('#messageBox').empty();
+                    if(history && history.length > 0) {
+                        history.reverse().forEach(msg => displayMessage(msg, true));
+                    } else {
+                        $('#messageBox').append('<div class="text-center text-muted my-5">이전 대화가 없습니다.</div>');
                     }
                 }).catch(e => console.error("내역 로드 실패", e));
         }
 
-        // 4. 메시지 전송
+        // 4. 채팅방 나가기
+        function leaveRoom() {
+            if(!currentRoomId) return;
+            if(!confirm("정말 이 채팅방을 나가시겠습니까?")) return;
+
+            axios.delete(`${SERVER_URL}/api/chat/room/leave/${currentRoomId}`)
+                .then(res => {
+                    alert("방에서 나갔습니다.");
+                    const subPath = `/sub/chat/room/${currentRoomId}`;
+                    if(subscriptions[subPath]) {
+                        subscriptions[subPath].unsubscribe();
+                        delete subscriptions[subPath];
+                    }
+                    currentRoomId = null;
+                    $('#currentRoomTitle').text("방을 선택하세요");
+                    $('#messageBox').empty();
+                    $('#chatHeaderActions').hide();
+                    loadMyRooms();
+                }).catch(e => alert("방 나가기 실패"));
+        }
+
+        // 5. 메시지 검색
+        function searchMessages() {
+            const keyword = $('#searchKeyword').val();
+            if (!currentRoomId) return alert("방을 먼저 선택해주세요.");
+            if (!keyword) return loadMessages(currentRoomId);
+
+            axios.get(`${SERVER_URL}/api/chat/room/${currentRoomId}/messages/search`, {
+                params: { keyword: keyword }
+            })
+                .then(res => {
+                    const results = res.data.content;
+                    $('#messageBox').empty();
+                    $('#messageBox').append(`<div class="text-center small text-primary fw-bold my-3">🔍 '${keyword}' 검색 결과 (${results.length}건)</div>`);
+                    results.forEach(msg => displayMessage(msg, true));
+                }).catch(e => alert("검색 실패"));
+        }
+
+        // 6. 메시지 전송 (DTO 양식 준수)
         function sendMessage() {
             const content = $('#messageInput').val();
             if (!currentRoomId || !content) return;
 
+            // ChatMessageRequestDto 양식에 맞춘 데이터
             const payload = {
                 roomId: currentRoomId,
-                content: content
+                senderId: "1001", // 테스트용 사번 (실제 로그인 유저 정보로 변경 필요)
+                content: content,
+                messageType: "TEXT", // 필수 값
+                fileUrl: ""
             };
 
             stompClient.send("/pub/chat/message", {}, JSON.stringify(payload));
             $('#messageInput').val('');
         }
 
+        // 7. 메시지 표시 (필드 매칭 수정)
         function displayMessage(raw, isHistory) {
             let data;
             try {
-                data = JSON.parse(raw);
+                // 이미 객체면 그대로, 문자열이면 JSON 파싱
+                data = (typeof raw === 'string') ? JSON.parse(raw) : raw;
             } catch(e) {
                 data = { senderId: 'System', content: raw };
             }
 
-            const alertClass = isHistory ? 'alert-secondary text-muted' : 'alert-info';
+            // DOCKin 백엔드 필드명에 맞춰 매칭 (senderId, content, sentAt 등)
+            const sender = data.senderId || '알 수 없음';
+            const content = data.content || '내용 없음';
+            const time = data.sentAt || '';
+
+            const alertClass = isHistory ? 'alert-secondary text-muted' : 'alert-info shadow-sm';
             const html = `
-                <div class="mb-3 px-2">
-                    <div class="alert ${alertClass} d-inline-block py-2 px-3 mb-0" style="max-width: 85%; border: none;">
-                        <b style="font-size:0.85rem; display:block; margin-bottom:2px;">${data.senderId || '알 수 없음'}</b>
-                        <span>${data.content}</span>
+                <div class="mb-3 px-2 text-start">
+                    <div class="alert ${alertClass} d-inline-block py-2 px-3 mb-0" style="max-width: 85%;">
+                        <b style="font-size:0.75rem; display:block; margin-bottom:2px; color:#555;">${sender}</b>
+                        <span style="font-size:0.95rem;">${content}</span>
                     </div>
-                    <span class="msg-time px-1">${data.sentAt || ''}</span>
+                    <span class="msg-time px-1">${time}</span>
                 </div>`;
             $('#messageBox').append(html);
             $('#messageBox').scrollTop($('#messageBox')[0].scrollHeight);
@@ -136,41 +191,56 @@
 
         $(function() {
             $('#messageInput').keypress(e => { if(e.which == 13) sendMessage(); });
+            $('#searchKeyword').keypress(e => { if(e.which == 13) searchMessages(); });
+            $('#chatHeaderActions').hide();
         });
     </script>
 </head>
 <body class="bg-light">
 <div class="container py-4">
-    <div class="card shadow-lg border-0">
+    <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 15px;">
         <div class="card-body p-0">
             <div class="row g-0">
-                <div class="col-md-4 border-end" style="height: 850px; display: flex; flex-direction: column; background: white;">
-                    <div class="p-3 bg-primary text-white shadow-sm">
-                        <h5 class="mb-0">DOCKin 채팅 목록</h5>
+                <div class="col-md-4 border-end" style="height: 800px; display: flex; flex-direction: column; background: white;">
+                    <div class="p-4 bg-primary text-white">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-chat-dots-fill me-2"></i>DOCKin Chat</h5>
                     </div>
                     <div class="p-3 border-bottom bg-light">
                         <label class="small fw-bold text-muted mb-1">JWT 인증 토큰</label>
-                        <input type="text" id="jwtToken" class="form-control form-control-sm mb-2" placeholder="Bearer 제외 입력">
+                        <textarea id="jwtToken" class="form-control form-control-sm mb-2" rows="2" placeholder="Bearer 제외 입력"></textarea>
+                        <button class="btn btn-dark btn-sm w-100 fw-bold" onclick="connect()">서버 연결 및 로그인</button>
                         <input type="hidden" id="websocketUrl" value="ws://localhost:8080/ws">
-                        <button class="btn btn-dark btn-sm w-100" onclick="connect()">서버 연결 및 목록 로드</button>
                     </div>
-                    <div id="roomList" class="overflow-auto flex-grow-1">
-                        <div class="text-center p-5 text-muted">연결 버튼을 누르면<br>채팅방 목록이 나타납니다.</div>
-                    </div>
+                    <div id="roomList" class="overflow-auto flex-grow-1"></div>
                 </div>
 
-                <div class="col-md-8 d-flex flex-column" style="height: 850px; background: #f8f9fa;">
-                    <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center shadow-sm" style="z-index: 10;">
-                        <h6 id="currentRoomTitle" class="mb-0 fw-bold">방을 선택해주세요</h6>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="loadMyRooms()">새로고침</button>
+                <div class="col-md-8 d-flex flex-column" style="height: 800px; background: #fdfdfd;">
+                    <div class="p-3 border-bottom bg-white shadow-sm" style="z-index: 10;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 id="currentRoomTitle" class="mb-0 fw-bold text-dark">방을 선택하세요</h6>
+                            <div id="chatHeaderActions">
+                                <button class="btn btn-sm btn-outline-danger border-0 fw-bold me-2" onclick="leaveRoom()">
+                                    <i class="bi bi-box-arrow-right"></i> 나가기
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary border-0" onclick="loadMyRooms()">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                            <input type="text" id="searchKeyword" class="form-control border-0 bg-light" placeholder="채팅 내용 검색 (Enter)">
+                            <button class="btn btn-outline-primary border-0 fw-bold" onclick="searchMessages()">검색</button>
+                            <button class="btn btn-outline-danger border-0 fw-bold" onclick="loadMessages(currentRoomId)">취소</button>
+                        </div>
                     </div>
 
                     <div id="messageBox" class="flex-grow-1 p-4 overflow-auto"></div>
 
                     <div class="p-3 bg-white border-top">
-                        <div class="input-group shadow-sm">
-                            <input type="text" id="messageInput" class="form-control border-0 bg-light" placeholder="메시지를 입력하세요..." style="padding: 12px;">
-                            <button class="btn btn-primary px-4" onclick="sendMessage()">전송</button>
+                        <div class="input-group overflow-hidden" style="border-radius: 30px; background: #f1f3f5;">
+                            <input type="text" id="messageInput" class="form-control border-0 bg-transparent px-4" placeholder="메시지를 입력하세요..." style="height: 50px;">
+                            <button class="btn btn-primary px-4" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
                         </div>
                     </div>
                 </div>

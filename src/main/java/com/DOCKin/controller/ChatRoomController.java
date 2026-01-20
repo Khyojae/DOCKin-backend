@@ -50,8 +50,10 @@ public class ChatRoomController {
 
     @Operation(summary="채팅방 상세 조회", description="특정 채팅방 상세 조회")
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<ChatRoomResponseDto> roomInfo(@PathVariable Integer roomId){
-        return ResponseEntity.ok(chatRoomService.getChatRoomsInfo(roomId));
+    public ResponseEntity<ChatRoomResponseDto> roomInfo(@PathVariable Integer roomId,
+                                                        @AuthenticationPrincipal CustomUserDetails customUserDetails){
+        String userId = customUserDetails.getMember().getUserId();
+        return ResponseEntity.ok(chatRoomService.getChatRoomsInfo(userId,roomId));
     }
 
 

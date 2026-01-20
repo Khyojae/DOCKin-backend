@@ -14,5 +14,4 @@ public interface ChatRoomsRepository extends JpaRepository<ChatRooms,Integer> {
     @Query("SELECT r FROM ChatRooms r JOIN r.members m WHERE m.member = :member")
     Page<ChatRooms> findByMembers(@Param("member") Member member, Pageable pageable);
 
-    long countByChatRooms(ChatRooms chatRooms);
 }
