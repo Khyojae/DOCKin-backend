@@ -1,6 +1,7 @@
 package com.DOCKin.controller;
 
 import com.DOCKin.dto.chat.ChatMessageRequestDto;
+import com.DOCKin.service.ChatRoomService;
 import com.DOCKin.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,12 +10,15 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
+    private final ChatRoomService chatRoomService;
 
     @MessageMapping("/chat/message")
     public void message(ChatMessageRequestDto message, SimpMessageHeaderAccessor headerAccessor){
@@ -27,15 +31,17 @@ public class ChatController {
             }
         }
 
-
         log.info("메시지 수신: 방번호={}, 보낸이={}, 내용={}",
                 message.getRoomId(),message.getSenderId(),message.getContent());
 
-        String destination = "/sub/chat/room/" + String.valueOf(message.getRoomId());
-        log.info("==> [발송 경로 확인]: {}", destination);
+        messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
 
-        messagingTemplate.convertAndSend("/sub/chat/room/"+message.getRoomId(),message);
-        messagingTemplate.convertAndSend("/sub/chat/rooms/update", message);
+        List<String> memberIds = chatRoomService.getParticipantsIds(message.getRoomId());
+
+        for (String userId : memberIds) {
+            messagingTemplate.convertAndSend("/sub/user/" + userId + "/rooms", message);
+        }
+        
         chatService.saveMessage(message);
     }
 

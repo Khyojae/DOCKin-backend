@@ -43,10 +43,10 @@ public class ChatRoomResponseDto {
     @Schema(description = "마지막 메시지 시간")
     private LocalDateTime lastMessageAt;
 
+    @Schema(description = "안 읽은 메시지 수")
+    private long unreadCount;
 
-
-
-    public static ChatRoomResponseDto from(ChatRooms entity){
+    public static ChatRoomResponseDto from(ChatRooms entity, long unreadCount){
         return ChatRoomResponseDto.builder()
                 .room_Id(entity.getRoomId())
                 .room_name(entity.getRoomName())
@@ -56,6 +56,7 @@ public class ChatRoomResponseDto {
                 .participantIds(entity.getMembers().stream().map(member->member.getMember().getUserId()).collect(Collectors.toList()))
                 .lastMessageContent(entity.getLastMessageContent())
                 .lastMessageAt(entity.getLastMessageAt())
+                .unreadCount(unreadCount)
                 .build();
     }
 }

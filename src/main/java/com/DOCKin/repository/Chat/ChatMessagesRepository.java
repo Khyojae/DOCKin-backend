@@ -33,4 +33,11 @@ public interface ChatMessagesRepository extends JpaRepository<ChatMessages, Long
             @Param("joinedAt") LocalDateTime joinedAt,
             @Param("keyword") String keyword,
             Pageable pageable);
+
+    // 3. 특정 방에서 특정 시간 이후에 생성된 메시지 개수 카운트
+    @Query("SELECT COUNT(m) FROM ChatMessages m "+
+    "WHERE m.chatRooms.roomId = :roomId "+
+    "AND m.sentAt > :lastReadTime")
+    long countByChatRooms_RoomIdAndCreatedAtAfter(@Param("roomId") Integer roomId,
+                                                  @Param("lastReadTime") LocalDateTime lastReadTime);
 }

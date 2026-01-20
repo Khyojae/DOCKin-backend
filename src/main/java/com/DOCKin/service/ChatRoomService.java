@@ -9,6 +9,7 @@ import com.DOCKin.model.Chat.ChatMembers;
 import com.DOCKin.model.Chat.ChatRooms;
 import com.DOCKin.model.Member.Member;
 import com.DOCKin.repository.Chat.ChatMembersRepository;
+import com.DOCKin.repository.Chat.ChatMessagesRepository;
 import com.DOCKin.repository.Chat.ChatRoomsRepository;
 import com.DOCKin.repository.Member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class ChatRoomService {
     private final ChatRoomsRepository chatRoomsRepository;
     private final ChatMembersRepository chatMembersRepository;
     private final MemberRepository memberRepository;
+    private final ChatMessagesRepository chatMessagesRepository;
 
     //채팅방 개설 (처음 채팅방 만들 때 해당)
     @Transactional
@@ -49,7 +53,7 @@ public class ChatRoomService {
                     .forEach(userId->saveMember(savedRoom,userId));
 
         }
-        return ChatRoomResponseDto.from(savedRoom);
+        return ChatRoomResponseDto.from(savedRoom,0L);
     }
 
     //채팅방 목록 가져오기
@@ -60,11 +64,20 @@ public class ChatRoomService {
 
         Page<ChatRooms> chatRoomsPage = chatRoomsRepository.findByMembers(member,pageable);
 
-        return chatRoomsPage.map(ChatRoomResponseDto::from);
+        return chatRoomsPage.map(room ->{
+            ChatMembers participant = chatMembersRepository.findByChatRooms_RoomIdAndMember_UserId(room.getRoomId(),userId)
+                    .orElseThrow(()->new BusinessException(ErrorCode.CHATMEMBER_NOT_FOUND));
+
+            long unreadCount = chatMessagesRepository.countByChatRooms_RoomIdAndCreatedAtAfter(
+                    room.getRoomId(),
+                    participant.getLastReadTime()
+            );
+            return ChatRoomResponseDto.from(room,unreadCount);
+        });
     }
 
     //특정 채팅방 목록 가져오기
-    @Transactional(readOnly = true)
+    @Transactional
     public ChatRoomResponseDto getChatRoomsInfo(String userId,Integer roomId){
 
         Member member = memberRepository.findByUserId(userId)
@@ -76,8 +89,13 @@ public class ChatRoomService {
         ChatRooms rooms = chatRoomsRepository.findById(roomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.CHATROOM_NOT_FOUND));
 
+        //읽음 처리 업데이트
+        ChatMembers participant = chatMembersRepository.findByChatRooms_RoomIdAndMember_UserId(roomId, userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.CHATMEMBER_NOT_FOUND));
 
-        return  ChatRoomResponseDto.from(rooms);
+        participant.updateLastReadTime();
+
+        return  ChatRoomResponseDto.from(rooms,0L);
     }
 
     //유저가 채팅방 멤버인지 입증
@@ -139,7 +157,7 @@ public class ChatRoomService {
         ChatRooms updatedRoom = chatRoomsRepository.findById(chatRoomId)
                 .orElseThrow(()->new BusinessException(ErrorCode.CHATROOM_NOT_FOUND));
 
-        return ChatRoomResponseDto.from(updatedRoom);
+        return ChatRoomResponseDto.from(updatedRoom,0L);
     }
 
     //채팅방 삭제 (말그대로 채팅방 삭제)
@@ -179,5 +197,13 @@ public class ChatRoomService {
         chatMembersRepository.save(chatMember);
     }
 
+    //각 멤버에게 라우팅
+    @Transactional(readOnly = true)
+    public List<String> getParticipantsIds(Integer roomId){
+        return chatMembersRepository.findByChatRooms_RoomId(roomId)
+                .stream()
+                .map(chatMember->chatMember.getMember().getUserId())
+                .collect(Collectors.toList());
+    }
 
 }

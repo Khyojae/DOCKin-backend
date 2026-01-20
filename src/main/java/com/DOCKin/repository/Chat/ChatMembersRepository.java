@@ -5,6 +5,9 @@ import com.DOCKin.model.Chat.ChatRooms;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface ChatMembersRepository extends JpaRepository<ChatMembers,Integer> {
@@ -18,4 +21,7 @@ boolean existsByChatRoomsAndMember_UserId(ChatRooms chatRooms, String userId);
 
     Optional<ChatMembers> findByChatRooms_RoomIdAndMember_UserId(Integer roomId, String userId);
 
-    boolean existsByChatRooms_RoomIdAndMember_UserId(Integer roomId, String userId);}
+    boolean existsByChatRooms_RoomIdAndMember_UserId(Integer roomId, String userId);
+
+    List<ChatMembers> findByChatRooms_RoomId(Integer roomId);
+}
