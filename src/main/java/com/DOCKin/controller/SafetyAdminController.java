@@ -19,12 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SafetyAdminController {
 
-    @Operation(summary="전체 교육 자료 조회", description = "전체 교육 자료를 조회할 수 있음")
-    @GetMapping("/enrollments")
-    public ResponseEntity<List<SafetyCourseResponseDto>> getAllEnrollments(){
-        return ResponseEntity.ok(null);
-    }
-
     @Operation(summary="교육 자료 등록",description = "교육 자료를 등록할 수 있음")
     @PostMapping("/courses")
     public ResponseEntity<SafetyCourseResponseDto> createCourse(@RequestBody SafetyCourseCreateRequestDto safetyCourseCreateRequestDto) {

@@ -6,6 +6,7 @@ import com.DOCKin.dto.SafetyCourse.SafetyCourseUpdateRequestDto;
 import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.model.Member.Member;
+import com.DOCKin.model.Member.UserRole;
 import com.DOCKin.model.SafetyCourse.SafetyCourse;
 import com.DOCKin.repository.Member.MemberRepository;
 import com.DOCKin.repository.SafetyCourse.SafetyCourseRepository;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @Slf4j
@@ -32,6 +32,11 @@ public class SafetyCourseService {
     public SafetyCourseResponseDto safetyCourseResponse(SafetyCourseCreateRequestDto dto, String userId){
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        //관리자만 안전교육 생성 가능
+        if(member.getRole()!= UserRole.ADMIN){
+            throw new BusinessException(ErrorCode.SAFETYCOURSE_AUTHOR);
+        }
 
         SafetyCourse safetyCourse = SafetyCourse.builder().
                 title(dto.getTitle()).
@@ -75,23 +80,39 @@ public class SafetyCourseService {
         return SafetyCourseResponseDto.fromEntity(safetyCourseRepository.save(logs));
     }
 
-    //교육자료 조회
+    //전체 교육자료 조회
     @Transactional(readOnly = true)
-    public Page<SafetyCourseResponseDto> readSafetyCourse(String userId, Pageable pageable){
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-
+    public Page<SafetyCourseResponseDto> readSafetyCourse(Pageable pageable){
         Page<SafetyCourse> safetyCourses = safetyCourseRepository.findAll(pageable);
         return safetyCourses.map(SafetyCourseResponseDto::fromEntity);
     }
 
-    //교육자료 삭제
+    //키워드로 교육자료 조회
     @Transactional(readOnly = true)
+    public Page<SafetyCourseResponseDto> searchSafetyCourse(String keyword,Pageable pageable){
+        Page<SafetyCourse> search = safetyCourseRepository.searchByKeyword(
+                keyword,
+                pageable
+        );
+
+        return search.map(SafetyCourseResponseDto::fromEntity);
+    }
+
+    //특정 교육자료 조회
+    @Transactional(readOnly = true)
+    public Page<SafetyCourseResponseDto> searchOtherSafetyCourse(String targetUserId, Pageable pageable){
+       Page<SafetyCourse> safetyCourses = safetyCourseRepository.findByCreatedBy(targetUserId,pageable);
+       return safetyCourses.map(SafetyCourseResponseDto::fromEntity);
+    }
+
+    //특정 교육자료 삭제
+    @Transactional
     public void  deleteSafetyCourse(String userId, Integer courseId){
         SafetyCourse safetyCourse =safetyCourseRepository.findById(courseId)
                 .orElseThrow(()->new BusinessException(ErrorCode.SAFETYCOURSE_NOT_FOUND));
 
-        if(!safetyCourse.getCourseId().equals(courseId)){
+
+        if(!safetyCourse.getCreatedBy().equals(userId)){
             throw new BusinessException(ErrorCode.SAFETYCOURSE_AUTHOR);
         }
 
