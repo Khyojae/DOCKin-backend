@@ -4,8 +4,6 @@ import com.DOCKin.dto.SafetyCourse.SafetyCourseCreateRequestDto;
 import com.DOCKin.dto.SafetyCourse.SafetyCourseResponseDto;
 import com.DOCKin.dto.SafetyCourse.SafetyCourseUpdateRequestDto;
 import com.DOCKin.global.security.auth.CustomUserDetails;
-import com.DOCKin.model.SafetyCourse.SafetyCourse;
-import com.DOCKin.service.CustomUserDetailsService;
 import com.DOCKin.service.SafetyCourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
