@@ -28,6 +28,9 @@ public class SafetyCourseResponseDto {
     @Schema(description = "교육 영상 주소", requiredMode = Schema.RequiredMode.REQUIRED)
     private String videoUrl;
 
+    @Schema(description = "교육 참고 자료 URL (PDF 등)")
+    private String materialUrl;
+
     @Schema(description = "강의 소요 시간 (분)", example = "45", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer durationMinutes;
 

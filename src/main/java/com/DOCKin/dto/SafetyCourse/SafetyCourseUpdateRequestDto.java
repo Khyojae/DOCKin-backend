@@ -29,6 +29,9 @@ public class SafetyCourseUpdateRequestDto {
     @NotBlank(message = "영상 주소는 필수입니다.")
     private String videoUrl;
 
+    @Schema(description = "교육 참고 자료 URL (PDF 등)")
+    private String materialUrl;
+
     @Schema(description = "교육 소요 시간 (분)", example = "30", requiredMode = Schema.RequiredMode.REQUIRED)
     @Positive(message = "교육 시간은 0보다 커야 합니다.")
     private Integer durationMinutes;}

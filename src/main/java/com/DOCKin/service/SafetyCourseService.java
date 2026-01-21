@@ -41,7 +41,8 @@ public class SafetyCourseService {
         SafetyCourse safetyCourse = SafetyCourse.builder().
                 title(dto.getTitle()).
                 description(dto.getDescription()).
-                materialUrl(dto.getVideoUrl()).
+                materialUrl(dto.getMaterialUrl()).
+                videoUrl(dto.getVideoUrl()).
                 durationMinutes(dto.getDurationMinutes()).
                 createdBy(member.getUserId()).build();
 
