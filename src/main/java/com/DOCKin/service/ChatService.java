@@ -28,7 +28,7 @@ public class ChatService {
     private final ChatRoomsRepository chatRoomsRepository;
     private final ChatMembersRepository chatMembersRepository;
 
-    //@Async
+    @Async
     @Transactional
     public void saveMessage(ChatMessageRequestDto dto) {
         log.info("### [시작] 동기 방식으로 실행");

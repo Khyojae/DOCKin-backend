@@ -1,10 +1,7 @@
 package com.DOCKin.model.SafetyCourse;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,6 +9,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "safety_courses")
 @Getter
+@Setter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SafetyCourse {
     @Id
@@ -42,21 +41,15 @@ public class SafetyCourse {
     private LocalDateTime createdAt;
 
     @Builder
-    public SafetyCourse(String title, String description, String materialUrl, Integer durationMinutes, String createdBy) {
+    public SafetyCourse(String title, String description, String videoUrl,String materialUrl, Integer durationMinutes, String createdBy) {
         this.title = title;
         this.description = description;
-        this.videoUrl = materialUrl;
+        this.videoUrl = videoUrl;
         this.materialUrl = materialUrl;
         this.durationMinutes = durationMinutes;
         this.createdBy = createdBy;
         this.createdAt = LocalDateTime.now();
     }
 
-    public void updateContent(String title, String description, String materialUrl, Integer durationMinutes) {
-        this.title = title;
-        this.description = description;
-        this.videoUrl = materialUrl;
-        this.materialUrl = materialUrl;
-        this.durationMinutes = durationMinutes;
-    }
+
 }

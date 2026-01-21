@@ -1,6 +1,6 @@
 package com.DOCKin.controller;
 
-import com.DOCKin.dto.SafetyCourse.SafetyCourseResponse;
+import com.DOCKin.dto.SafetyCourse.SafetyCourseResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class SafetyUserController {
 
     @Operation(summary="미이수 영상 조회", description = "사용자의 미이수 영상을 조회해줌")
     @GetMapping("/training/uncompleted")
-    public ResponseEntity<List<SafetyCourseResponse>> getUncompletedVideos() {
+    public ResponseEntity<List<SafetyCourseResponseDto>> getUncompletedVideos() {
         return ResponseEntity.ok(null);
     }
 
@@ -31,13 +31,13 @@ public class SafetyUserController {
 
     @Operation(summary="전체 교육 조회", description = "전체 교육을 조회해줌")
     @GetMapping("/courses")
-    public ResponseEntity<List<SafetyCourseResponse>> getAllCoursesForUser() {
+    public ResponseEntity<List<SafetyCourseResponseDto>> getAllCoursesForUser() {
         return ResponseEntity.ok(null);
     }
 
     @Operation(summary="특정 교육 조회", description = "특정 교육을 조회해줌")
     @GetMapping("/courses/{courseId}")
-    public ResponseEntity<SafetyCourseResponse> getCourseDetailForUser(@PathVariable("courseId") Integer courseId) {
-        return ResponseEntity.ok(new SafetyCourseResponse());
+    public ResponseEntity<SafetyCourseResponseDto> getCourseDetailForUser(@PathVariable("courseId") Integer courseId) {
+        return ResponseEntity.ok(new SafetyCourseResponseDto());
     }
 }
