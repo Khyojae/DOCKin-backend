@@ -1,7 +1,7 @@
 package com.DOCKin.controller;
 
-import com.DOCKin.dto.SafetyCourse.SafetyCourseCreateRequest;
-import com.DOCKin.dto.SafetyCourse.SafetyCourseResponse;
+import com.DOCKin.dto.SafetyCourse.SafetyCourseCreateRequestDto;
+import com.DOCKin.dto.SafetyCourse.SafetyCourseResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,34 +21,34 @@ public class SafetyAdminController {
 
     @Operation(summary="전체 교육 자료 조회", description = "전체 교육 자료를 조회할 수 있음")
     @GetMapping("/enrollments")
-    public ResponseEntity<List<SafetyCourseResponse>> getAllEnrollments(){
+    public ResponseEntity<List<SafetyCourseResponseDto>> getAllEnrollments(){
         return ResponseEntity.ok(null);
     }
 
     @Operation(summary="교육 자료 등록",description = "교육 자료를 등록할 수 있음")
     @PostMapping("/courses")
-    public ResponseEntity<SafetyCourseResponse> createCourse(@RequestBody SafetyCourseCreateRequest safetyCourseCreateRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new SafetyCourseResponse());
+    public ResponseEntity<SafetyCourseResponseDto> createCourse(@RequestBody SafetyCourseCreateRequestDto safetyCourseCreateRequestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(new SafetyCourseResponseDto());
     }
 
     @Operation(summary="전체 교육 자료 조회",description = "전체 교육 자료를 조회할 수 있음")
     @GetMapping("/courses")
-    public ResponseEntity<List<SafetyCourseResponse>> getAllCourses() {
+    public ResponseEntity<List<SafetyCourseResponseDto>> getAllCourses() {
         return ResponseEntity.ok(null);
     }
 
 
     @Operation(summary="특정 교육 상세 조회",description = "특정 교육 자료를 조회할 수 있음")
     @GetMapping("/courses/{courseId}")
-    public ResponseEntity<SafetyCourseResponse> getCourseDetail(@PathVariable Integer courseId) {
-        return ResponseEntity.ok(new SafetyCourseResponse());
+    public ResponseEntity<SafetyCourseResponseDto> getCourseDetail(@PathVariable Integer courseId) {
+        return ResponseEntity.ok(new SafetyCourseResponseDto());
     }
 
     @Operation(summary="교육 자료 수정",description = "특정 교육 자료를 수정할 수 있음")
     @PutMapping("/courses/{courseId}")
-    public ResponseEntity<SafetyCourseResponse> updateCourse(@PathVariable Integer courseId,
-                                          @RequestBody SafetyCourseCreateRequest request) {
-        return ResponseEntity.ok(new SafetyCourseResponse());
+    public ResponseEntity<SafetyCourseResponseDto> updateCourse(@PathVariable Integer courseId,
+                                                                @RequestBody SafetyCourseCreateRequestDto request) {
+        return ResponseEntity.ok(new SafetyCourseResponseDto());
     }
 
     @Operation(summary="특정 교육 자료 삭제",description = "특정 교육자료를 삭제할 수 있음")

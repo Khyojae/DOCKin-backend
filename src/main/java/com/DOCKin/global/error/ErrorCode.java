@@ -27,6 +27,10 @@ public enum ErrorCode {
     CHATMEMBER_NOT_FOUND(400, "C002", "존재하지 않는 채팅방 멤버입니다."),
     CHATROOM_AUTHOR(400, "C003", "채팅방의 권한이 없습니다."),
 
+    //SafetyCourse
+    SAFETYCOURSE_NOT_FOUND(404, "S001", "존재하지 않는 안전교육입니다."),
+    SAFETYCOURSE_AUTHOR(403, "S002", "안전교육 수정 권한이 없습니다."),
+
 
     // Worklog
     LOG_NOT_FOUND(404, "W001", "존재하지 않는 작업 일지입니다."),
