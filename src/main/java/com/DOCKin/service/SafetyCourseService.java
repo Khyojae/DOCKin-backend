@@ -29,7 +29,7 @@ public class SafetyCourseService {
 
     //교육 자료 등록
     @Transactional
-    public SafetyCourseResponseDto safetyCourseResponse(SafetyCourseCreateRequestDto dto, String userId){
+    public SafetyCourseResponseDto createSafetyCourseResponse(SafetyCourseCreateRequestDto dto, String userId){
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -52,7 +52,7 @@ public class SafetyCourseService {
 
     //교육 자료 수정
     @Transactional
-    public SafetyCourseResponseDto safetyCourseResponseDto(SafetyCourseUpdateRequestDto dto, String userId){
+    public SafetyCourseResponseDto reviseSafetyCourseResponseDto(SafetyCourseUpdateRequestDto dto, String userId){
 
        SafetyCourse logs = safetyCourseRepository.findById(dto.getCourseId())
                .orElseThrow(()->new BusinessException(ErrorCode.SAFETYCOURSE_NOT_FOUND));
@@ -62,9 +62,6 @@ public class SafetyCourseService {
            throw new BusinessException(ErrorCode.SAFETYCOURSE_AUTHOR);
        }
 
-       if(dto.getCourseId()!=null){
-           logs.setCourseId(dto.getCourseId());
-       }
         if(dto.getTitle()!=null){
             logs.setTitle(dto.getTitle());
         }
@@ -98,7 +95,7 @@ public class SafetyCourseService {
         return search.map(SafetyCourseResponseDto::fromEntity);
     }
 
-    //특정 교육자료 조회
+    //특정 작성자가 쓴 교육자료 조회
     @Transactional(readOnly = true)
     public Page<SafetyCourseResponseDto> searchOtherSafetyCourse(String targetUserId, Pageable pageable){
        Page<SafetyCourse> safetyCourses = safetyCourseRepository.findByCreatedBy(targetUserId,pageable);
