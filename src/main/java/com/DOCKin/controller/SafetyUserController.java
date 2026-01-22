@@ -39,7 +39,7 @@ public class SafetyUserController {
     }
 
     @Operation(summary="영상 조회 완료", description="사용자가 영상 조회를 완료했는지 확인해줌")
-    @PutMapping("/training/complete/{videoId}")
+    @PatchMapping("/training/complete")
     public ResponseEntity<Void> completeCourse(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                @RequestBody SafetyWatchStatusRequestDto dto) {
         String userId = customUserDetails.getMember().getUserId();

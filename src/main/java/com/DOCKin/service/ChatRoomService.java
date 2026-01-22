@@ -49,10 +49,15 @@ public class ChatRoomService {
         //초대받은 참여자들 저장
         if(dto.getParticipantIds()!=null){
             dto.getParticipantIds().stream()
+                    .distinct()
                     .filter(userId -> !userId.equals(creatorId))
                     .forEach(userId->saveMember(savedRoom,userId));
 
         }
+
+
+        chatMembersRepository.flush();
+
         return ChatRoomResponseDto.from(savedRoom,0L);
     }
 
@@ -122,8 +127,8 @@ public class ChatRoomService {
         }
 
         //방 이름 수정
-        if(dto.getRoom_name()!=null){
-            rooms.updateRoomName(dto.getRoom_name());
+        if(dto.getRoomName()!=null){
+            rooms.updateRoomName(dto.getRoomName());
         }
 
         //멤버 삭제(방장 제외)
@@ -195,6 +200,10 @@ public class ChatRoomService {
                 .joinedAt(LocalDateTime.now())
                 .build();
         chatMembersRepository.save(chatMember);
+
+        if (rooms.getMembers() != null) {
+            rooms.getMembers().add(chatMember);
+        }
     }
 
     //각 멤버에게 라우팅

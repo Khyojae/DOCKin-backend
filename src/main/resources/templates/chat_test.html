@@ -12,32 +12,21 @@
     <style>
         :root { --main-color: #0d6efd; --bg-light: #f8f9fa; }
         body { background-color: #f0f2f5; font-family: 'Pretendard', sans-serif; }
-
-        /* 채팅 목록 스타일 */
-        .room-item { cursor: pointer; border-bottom: 1px solid #f1f1f1; transition: all 0.2s; background: white; position: relative; }
+        .room-item { cursor: pointer; border-bottom: 1px solid #f1f1f1; transition: all 0.2s; background: white; }
         .room-item:hover { background-color: #f8f9fa; }
         .room-item.active { background-color: #eef5ff !important; border-left: 4px solid var(--main-color); }
-
-        /* 안 읽은 배지 스타일 */
         .unread-badge {
             background-color: #ff3b30; color: white; border-radius: 50%;
             padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
             min-width: 18px; text-align: center; display: inline-block;
         }
-
-        /* 메시지 박스 스타일 */
         #messageBox { background-color: #f1f3f5; height: 550px; overflow-y: auto; display: flex; flex-direction: column; }
         .msg-container { margin-bottom: 12px; max-width: 80%; }
         .msg-bubble { border-radius: 15px; padding: 10px 15px; position: relative; font-size: 0.95rem; }
         .my-msg { align-self: flex-end; }
         .other-msg { align-self: flex-start; }
-
-        /* 애니메이션 */
         .new-msg-anim { animation: highlight 1.2s ease; }
-        @keyframes highlight {
-            0% { background-color: #fff9c4; }
-            100% { background-color: white; }
-        }
+        @keyframes highlight { 0% { background-color: #fff9c4; } 100% { background-color: white; } }
     </style>
 
     <script type="text/javascript">
@@ -47,7 +36,6 @@
         let currentUserId = "";
         const SERVER_URL = "http://localhost:8080";
 
-        // 1. 서버 연결
         function connect() {
             const jwtToken = $('#jwtToken').val();
             const inputUserId = $('#inputUserId').val();
@@ -58,58 +46,51 @@
             if (stompClient) stompClient.disconnect();
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + jwtToken;
 
+            // [중요] WebSocket 엔드포인트가 /ws 인지 확인하세요
             stompClient = Stomp.client("ws://localhost:8080/ws");
             stompClient.connect({'token': jwtToken}, () => {
                 alert(currentUserId + ' 연결 성공!');
 
-                // 내 전용 알림 채널 구독 (목록 갱신용)
+                // 내 알림 구독
                 stompClient.subscribe(`/sub/user/${currentUserId}/rooms`, (data) => {
-                    const msg = JSON.parse(data.body);
-                    handleListUpdate(msg);
+                    handleListUpdate(JSON.parse(data.body));
                 });
 
                 loadMyRooms();
             }, (e) => alert('연결 실패: ' + e));
         }
 
-        // 2. 실시간 목록 업데이트 (배지 숫자 포함)
         function handleListUpdate(msg) {
             const roomId = msg.roomId;
             const content = msg.content;
             const roomElem = $(`#room-${roomId}`);
 
             if (roomElem.length > 0) {
-                // 메시지 내용 변경 및 맨 위로 이동
                 roomElem.find('.last-msg').text(content);
                 $('#roomList').prepend(roomElem);
-
-                // 현재 보고 있는 방이 아닐 때만 숫자 올림
                 if (currentRoomId !== roomId) {
                     const badge = roomElem.find('.unread-badge');
                     let count = parseInt(badge.text()) || 0;
                     badge.text(count + 1).show();
                 }
-
                 roomElem.addClass('new-msg-anim');
                 setTimeout(() => roomElem.removeClass('new-msg-anim'), 1200);
             } else {
-                loadMyRooms(); // 초대받았을 경우 목록 전체 새로고침
+                loadMyRooms();
             }
         }
 
-        // 3. 내 채팅방 목록 로드
         function loadMyRooms() {
+            // [수정] 백엔드 DTO 필드명에 맞춰 rId = room.roomId 등으로 변경
             axios.get(`${SERVER_URL}/api/chat/rooms`)
                 .then(res => {
-                    const rooms = res.data.content;
+                    const rooms = res.data.content; // Page 객체 대응
                     const list = $('#roomList').empty();
                     rooms.forEach(room => {
-                        const rId = room.room_Id;
-                        const rName = room.room_name;
+                        const rId = room.roomId;
+                        const rName = room.roomName;
                         const lastMsg = room.lastMessageContent || '대화 내역이 없습니다.';
                         const activeClass = (currentRoomId === rId) ? 'active' : '';
-
-                        // 백엔드에서 준 unreadCount 반영
                         const unreadCount = room.unreadCount || 0;
                         const badgeStyle = unreadCount > 0 ? '' : 'display: none;';
 
@@ -122,7 +103,7 @@
                                     </div>
                                     <div class="text-end ms-2">
                                         <span class="unread-badge mb-1" style="${badgeStyle}">${unreadCount}</span>
-                                        <div class="badge bg-light text-secondary border-0 small">${room.is_group ? '그룹' : '1:1'}</div>
+                                        <div class="badge bg-light text-secondary border-0 small">${room.isGroup ? '그룹' : '1:1'}</div>
                                     </div>
                                 </div>
                             </div>`;
@@ -131,23 +112,17 @@
                 }).catch(e => console.error("목록 로딩 실패:", e));
         }
 
-        // 4. 채팅방 입장 (읽음 처리 포함)
         function enterRoom(roomId, roomName) {
             if (subscriptions['chat']) subscriptions['chat'].unsubscribe();
 
             currentRoomId = roomId;
             $('.room-item').removeClass('active');
-
-            const roomElem = $(`#room-${roomId}`);
-            roomElem.addClass('active');
-
-            // 입장 즉시 화면에서 배지 숨김
-            roomElem.find('.unread-badge').text('0').hide();
+            $(`#room-${roomId}`).addClass('active').find('.unread-badge').text('0').hide();
 
             $('#currentRoomTitle').text(roomName);
             $('#messageBox').empty();
 
-            // 백엔드의 getChatRoomsInfo 호출 (서버 DB 읽음 처리 업데이트)
+            // 읽음 처리 업데이트 API 호출
             axios.get(`${SERVER_URL}/api/chat/room/${roomId}`)
                 .then(() => {
                     subscriptions['chat'] = stompClient.subscribe(`/sub/chat/room/${roomId}`, (data) => {
@@ -221,25 +196,18 @@
                     </div>
                     <button class="btn btn-dark btn-sm w-100 mt-2 fw-bold" onclick="connect()">접속</button>
                 </div>
-                <div id="roomList" class="overflow-auto flex-grow-1">
-                </div>
+                <div id="roomList" class="overflow-auto flex-grow-1"></div>
             </div>
 
             <div class="col-md-8 d-flex flex-column" style="height: 800px; background: #f1f3f5;">
                 <div class="p-3 border-bottom bg-white shadow-sm d-flex justify-content-between align-items-center">
                     <h6 id="currentRoomTitle" class="mb-0 fw-bold text-dark">채팅방을 선택하세요</h6>
-                    <i class="bi bi-three-dots-vertical text-muted"></i>
                 </div>
-
-                <div id="messageBox" class="flex-grow-1 p-4">
-                </div>
-
+                <div id="messageBox" class="flex-grow-1 p-4"></div>
                 <div class="p-3 bg-white border-top">
                     <div class="input-group shadow-sm">
                         <input type="text" id="messageInput" class="form-control border-0 bg-light" placeholder="메시지를 입력하세요..." style="padding: 12px;">
-                        <button class="btn btn-primary px-4" onclick="sendMessage()">
-                            <i class="bi bi-send-fill"></i>
-                        </button>
+                        <button class="btn btn-primary px-4" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
                     </div>
                 </div>
             </div>

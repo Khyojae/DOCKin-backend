@@ -15,7 +15,7 @@ import java.util.List;
 public class ChatRoomUpdateRequestDto {
 
     @Schema(description = "변경할 방 이름", example = "수정된 프로젝트 B팀 방")
-    private String room_name;
+    private String roomName;
 
     @Schema(description = "새롭게 추가될 참여자 ID 리스트", example = "[\"user_05\", \"user_06\"]")
     private List<String> addParticipantIds;

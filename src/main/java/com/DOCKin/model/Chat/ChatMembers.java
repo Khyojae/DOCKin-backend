@@ -1,6 +1,7 @@
 package com.DOCKin.model.Chat;
 
 import com.DOCKin.model.Member.Member;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class ChatMembers {
     @Column(name="id")
     private Integer id;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private ChatRooms chatRooms;

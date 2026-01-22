@@ -39,8 +39,8 @@ public class WorkLogsService {
 
         Work_logs work_logs = Work_logs.builder()
                 .title(dto.getTitle())
-                .log_text(dto.getLog_text())
-                .image_url(dto.getImage_url())
+                .log_text(dto.getLogText())
+                .image_url(dto.getImageUrl())
                 .equipment(equipment)
                 .member(member)
                 .build();
@@ -94,8 +94,8 @@ public class WorkLogsService {
         }
 
         if(dto.getTitle()!=null) logs.setTitle(dto.getTitle());
-        if(dto.getLog_text()!=null) logs.setLog_text(dto.getLog_text());
-        if(dto.getImage_url()!=null) logs.setImage_url(dto.getImage_url());
+        if(dto.getLogText()!=null) logs.setLog_text(dto.getLogText());
+        if(dto.getImageUrl()!=null) logs.setImage_url(dto.getImageUrl());
         if(dto.getEquipmentId()!=null){
             Equipment equipment = equipmentRepository.findById(dto.getEquipmentId())
                     .orElseThrow(()->new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND));

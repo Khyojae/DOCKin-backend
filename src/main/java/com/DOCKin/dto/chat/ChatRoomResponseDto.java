@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 @Schema(description = "채팅방 res dto")
 public class ChatRoomResponseDto {
     @Schema(description = "채팅방 이름", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String room_name;
+    private String roomName;
 
     @Schema(description = "채팅방 id", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Integer room_Id;
+    private Integer roomId;
 
     @Schema(description = "그룹채팅방인지 그냥 1대1채팅방인지", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Boolean is_group;
+    private Boolean isGroup;
 
     @Schema(description = "참가하는 인원의 사원번호", minLength = 2, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> participantIds;
@@ -48,9 +48,9 @@ public class ChatRoomResponseDto {
 
     public static ChatRoomResponseDto from(ChatRooms entity, long unreadCount){
         return ChatRoomResponseDto.builder()
-                .room_Id(entity.getRoomId())
-                .room_name(entity.getRoomName())
-                .is_group(entity.getIsGroup())
+                .roomId(entity.getRoomId())
+                .roomName(entity.getRoomName())
+                .isGroup(entity.getIsGroup())
                 .creatorId(entity.getCreatorId())
                 .createdAt(entity.getCreatedAt())
                 .participantIds(entity.getMembers().stream().map(member->member.getMember().getUserId()).collect(Collectors.toList()))
