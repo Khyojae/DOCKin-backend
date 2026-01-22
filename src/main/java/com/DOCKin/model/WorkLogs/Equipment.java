@@ -13,14 +13,14 @@ import lombok.*;
 public class Equipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long equipment_id;
+    private Long equipmentId;
 
     @Column(nullable = false, length = 100)
     private String name;
 
     @Column(nullable = false, length = 100)
-    private String qr_code;
+    private String qrCode;
 
     @Column(nullable = false, length = 100, unique = true)
-    private String nfc_tag;
+    private String nfcTag;
 }

@@ -34,7 +34,7 @@ public class SafetyEnrollment {
     private CompletedLabel status = CompletedLabel.UNWATCHED;
 
     @Column(name = "completion_date")
-    private LocalDateTime completion_date;
+    private LocalDateTime completionDate;
 
     @CreationTimestamp
     @Column(name = "enrolled_at", updatable = false)
@@ -44,7 +44,7 @@ public class SafetyEnrollment {
     public void updateStatus(CompletedLabel status){
         this.status = status;
         if (status == CompletedLabel.WATCHED) {
-            this.completion_date = LocalDateTime.now();
+            this.completionDate = LocalDateTime.now();
         }
     }
 }

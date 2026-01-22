@@ -39,8 +39,8 @@ public class WorkLogsService {
 
         Work_logs work_logs = Work_logs.builder()
                 .title(dto.getTitle())
-                .log_text(dto.getLogText())
-                .image_url(dto.getImageUrl())
+                .logText(dto.getLogText())
+                .imageUrl(dto.getImageUrl())
                 .equipment(equipment)
                 .member(member)
                 .build();
@@ -77,8 +77,15 @@ public class WorkLogsService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        Page<Work_logs> work_logs = workLogsRepository.findAllByMember_UserId(targetUserId,pageable);
+        Page<Work_logs> work_logs = workLogsRepository.findAllByMemberUserId(targetUserId,pageable);
 
+        return work_logs.map(Work_logsDto::from);
+    }
+
+    //키워드로 게시물 조회
+    @Transactional(readOnly = true)
+    public Page<Work_logsDto> searchByKeyword(String keyword,Pageable pageable){
+        Page<Work_logs> work_logs = workLogsRepository.searchWorkLogs(keyword,pageable);
         return work_logs.map(Work_logsDto::from);
     }
 
@@ -94,8 +101,8 @@ public class WorkLogsService {
         }
 
         if(dto.getTitle()!=null) logs.setTitle(dto.getTitle());
-        if(dto.getLogText()!=null) logs.setLog_text(dto.getLogText());
-        if(dto.getImageUrl()!=null) logs.setImage_url(dto.getImageUrl());
+        if(dto.getLogText()!=null) logs.setLogText(dto.getLogText());
+        if(dto.getImageUrl()!=null) logs.setImageUrl(dto.getImageUrl());
         if(dto.getEquipmentId()!=null){
             Equipment equipment = equipmentRepository.findById(dto.getEquipmentId())
                     .orElseThrow(()->new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND));

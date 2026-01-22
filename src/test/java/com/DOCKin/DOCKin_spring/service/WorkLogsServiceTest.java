@@ -111,11 +111,11 @@ class WorkLogsServiceTest {
 
         // 가짜 멤버와 장비 준비
         Member member = Member.builder().userId(userId).build();
-        Equipment equipment = Equipment.builder().equipment_id(1L).build();
+        Equipment equipment = Equipment.builder().equipmentId(1L).build();
 
         // 가짜 저장 결과 (ID가 할당된 객체)
         Work_logs savedLog = Work_logs.builder()
-                .log_id(50L)
+                .logId(50L)
                 .title(dto.getTitle())
                 .member(member)
                 .equipment(equipment)
@@ -148,13 +148,13 @@ class WorkLogsServiceTest {
         Member other = Member.builder().userId(targetId).shipYardArea("Area-A").build();
 
         // 조회될 가짜 데이터
-        Equipment equipment = Equipment.builder().equipment_id(1L).build(); // NPE 방지용
+        Equipment equipment = Equipment.builder().equipmentId(1L).build(); // NPE 방지용
         Work_logs otherLog = Work_logs.builder().title("상대방 글").member(other).equipment(equipment).build();
         Page<Work_logs> page = new PageImpl<>(List.of(otherLog));
 
         given(memberRepository.findByUserId(myId)).willReturn(Optional.of(me));
         given(memberRepository.findByUserId(targetId)).willReturn(Optional.of(other));
-        given(workLogsRepository.findAllByMember_UserId(targetId, pageable)).willReturn(page);
+        given(workLogsRepository.findAllByMemberUserId(targetId, pageable)).willReturn(page);
 
         // when
         Page<Work_logsDto> result = workLogsService.readOtherWorklog(myId, targetId, pageable);

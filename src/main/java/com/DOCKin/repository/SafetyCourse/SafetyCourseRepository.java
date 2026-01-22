@@ -6,10 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
 
 public interface SafetyCourseRepository extends JpaRepository<SafetyCourse, Integer> {
-    List<SafetyCourse> findAllByCourseIdIn(List<Integer> courseIds);
 
     @Query("SELECT s FROM SafetyCourse s WHERE "
     +"LOWER(s.title) LIKE LOWER(CONCAT('%',:keyword,'%')) OR "+

@@ -13,7 +13,7 @@ public class Authority {
     @Id
     @Column(name = "log_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long log_Id;
+    private Long logId;
 
     @Column(name="authority")
     private UserRole authority;

@@ -20,26 +20,26 @@ import java.time.LocalDateTime;
 public class Work_logs {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long log_id;
+    private Long logId;
 
     @Column(nullable = false,length = 256)
     private String title;
 
     @Lob
     @Column(name = "log_text", columnDefinition = "TEXT",nullable = false)
-    private String log_text;
+    private String logText;
 
-    private String audio_file_url;
+    private String audioFileUrl;
 
-    private String image_url;
+    private String imageUrl;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false, nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
