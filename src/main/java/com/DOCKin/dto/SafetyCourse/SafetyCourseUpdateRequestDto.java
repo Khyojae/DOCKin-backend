@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "안전 교육 생성 req dto")
+@Schema(description = "안전 교육 업데이트 req dto")
 public class SafetyCourseUpdateRequestDto {
     @Schema(description = "교육 자료 id", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer courseId;
@@ -36,7 +36,4 @@ public class SafetyCourseUpdateRequestDto {
     @Positive(message = "교육 시간은 0보다 커야 합니다.")
     private Integer durationMinutes;
 
-    @Schema(description = "시청 상태", example = "WATCHED", requiredMode = Schema.RequiredMode.REQUIRED)
-    @Positive(message = "시청 상태는 WATCHED/WATCHING/UNWATCHED 중에 하나임.")
-    private CompletedLabel status;
 }

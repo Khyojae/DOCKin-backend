@@ -193,7 +193,7 @@ CREATE TABLE safety_enrollments (
                                     enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
                                     user_id VARCHAR(50) NOT NULL,
                                     course_id INT NOT NULL,
-                                    is_completed BOOLEAN DEFAULT FALSE,
+                                    status VARCHAR(20) NOT NULL DEFAULT 'UNWATCHED',
                                     completion_date DATETIME, -- 이수 완료 시각 (NULL이면 미이수)
                                     enrolled_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,

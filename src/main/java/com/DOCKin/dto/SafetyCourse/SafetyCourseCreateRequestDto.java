@@ -38,8 +38,4 @@ public class SafetyCourseCreateRequestDto {
     @Positive(message = "교육 시간은 0보다 커야 합니다.")
     private Integer durationMinutes;
 
-    @Schema(description = "시청 상태", example = "WATCHED", requiredMode = Schema.RequiredMode.REQUIRED)
-    @Positive(message = "시청 상태는 WATCHED/WATCHING/UNWATCHED 중에 하나임.")
-    private CompletedLabel status;
-
 }
