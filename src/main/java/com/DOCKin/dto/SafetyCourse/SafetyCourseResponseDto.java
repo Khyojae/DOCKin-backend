@@ -2,6 +2,7 @@ package com.DOCKin.dto.SafetyCourse;
 
 import com.DOCKin.model.SafetyCourse.SafetyCourse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +35,9 @@ public class SafetyCourseResponseDto {
     @Schema(description = "강의 소요 시간 (분)", example = "45", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer durationMinutes;
 
+    @Schema(description = "시청 상태", example = "WATCHED", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Positive(message = "시청 상태는 WATCHED/WATCHING/UNWATCHED 중에 하나임.")
+    private CompletedLabel status;
 
     public static SafetyCourseResponseDto fromEntity(SafetyCourse saved){
         return SafetyCourseResponseDto.builder()
