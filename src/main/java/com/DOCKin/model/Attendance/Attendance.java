@@ -3,12 +3,9 @@ package com.DOCKin.model.Attendance;
 import com.DOCKin.model.Member.Member;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static java.time.Period.between;
 
 @Entity
 @Table(name="attendance")
@@ -48,17 +45,6 @@ public class Attendance {
     @Column(name="total_work_time")
     private String totalWorkTime;
 
-    public void recordClockOut(LocalDateTime outTime, String location, AttendanceStatus status){
-        this.clockOutTime = outTime;
-        this.outLocation = location;
 
-        if(this.clockOutTime!=null){
-            Duration duration = Duration.between(this.clockInTime,outTime);
-            long hours = duration.toHours();
-            long minutes = duration.toMinutesPart();
-            long seconds = duration.toSecondsPart();
-
-            this.totalWorkTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        }
     }
-}
+

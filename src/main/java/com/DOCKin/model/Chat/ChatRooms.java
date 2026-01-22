@@ -47,11 +47,6 @@ public class ChatRooms {
         if(this.isGroup==null) this.isGroup=false;
     }
 
-    public void updateLastMessage(String content, LocalDateTime sentAt){
-        this.lastMessageContent = content;
-        this.lastMessageAt=sentAt;
-    }
-
     public void updateRoomName(String room_name){
         if(room_name==null || room_name.isBlank()){
             throw new IllegalArgumentException("방 이름은 필수입니다.");

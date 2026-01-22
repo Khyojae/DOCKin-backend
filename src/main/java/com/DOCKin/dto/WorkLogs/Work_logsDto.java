@@ -41,14 +41,14 @@ public class Work_logsDto {
 
     public static Work_logsDto from(Work_logs entity) {
         return Work_logsDto.builder()
-                .logId(entity.getLog_id())
+                .logId(entity.getLogId())
                 .userId(entity.getMember().getUserId())
-                .equipmentId(entity.getEquipment().getEquipment_id())
+                .equipmentId(entity.getEquipment().getEquipmentId())
                 .title(entity.getTitle())
-                .logText(entity.getLog_text())
-                .imageUrl(entity.getImage_url())
-                .createdAt(entity.getCreated_at())
-                .updatedAt(entity.getUpdated_at())
+                .logText(entity.getLogText())
+                .imageUrl(entity.getImageUrl())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 }

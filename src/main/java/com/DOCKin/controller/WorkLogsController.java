@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Tag(name="작업일지 CRUD",description = "작업일지 CRUD가 가능함")
 @Slf4j
@@ -43,7 +42,7 @@ public class WorkLogsController {
     @GetMapping
     public ResponseEntity<Page<Work_logsDto>> getWorkLog(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(size = 10,direction = Sort.Direction.DESC)Pageable pageable
+            @PageableDefault(size = 20,direction = Sort.Direction.DESC)Pageable pageable
             ){
         String userId = customUserDetails.getMember().getUserId();
         return ResponseEntity.ok(workLogsService.readWorklog(userId,pageable));
@@ -53,7 +52,7 @@ public class WorkLogsController {
     @GetMapping("/others/{targetUserId}")
     public ResponseEntity<Page<Work_logsDto>> getMyWorkLog(@PathVariable String targetUserId,
                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                           @PageableDefault(size=10, direction = Sort.Direction.DESC)Pageable pageable){
+                                                           @PageableDefault(size=20, direction = Sort.Direction.DESC)Pageable pageable){
         String userId = customUserDetails.getMember().getUserId();
         return ResponseEntity.ok(workLogsService.readOtherWorklog(userId,targetUserId,pageable));
     }
@@ -68,9 +67,17 @@ public class WorkLogsController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(summary = "키워드로 게시물 검색", description = "키워드로 게시물 검색이 가능함")
+    @GetMapping("/search")
+    public ResponseEntity<Page<Work_logsDto>> searchByKeyword( @PageableDefault(size=20,sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable,
+                                                              String keyword){
+        Page<Work_logsDto> workLogsDtos = workLogsService.searchByKeyword(keyword,pageable);
+        return ResponseEntity.ok(workLogsDtos);
+    }
+
     @Operation(summary="특정 작업자 작업일지 삭제",description = "특정 작업자의 작업일지를 삭제해줌")
     @DeleteMapping("/{logId}")
-    public ResponseEntity<Void> DeleteMyWorkLog(@PathVariable("logId") Long logId,
+    public ResponseEntity<Void> DeleteMyWorkLog(@PathVariable Long logId,
                                                 @AuthenticationPrincipal CustomUserDetails customUserDetails){
         String userId = customUserDetails.getMember().getUserId();
         workLogsService.deleteWorklog(userId,logId);

@@ -11,7 +11,6 @@ import com.DOCKin.model.Member.UserRole;
 import com.DOCKin.repository.Member.MemberRepository;
 import com.DOCKin.repository.Member.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,6 @@ public class MemberService{
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtBlacklist jwtBlacklist;
     //로그인 로직

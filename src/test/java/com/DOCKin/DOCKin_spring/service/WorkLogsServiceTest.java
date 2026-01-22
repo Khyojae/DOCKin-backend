@@ -51,7 +51,7 @@ class WorkLogsServiceTest {
     void updateWorklog_Success() {
         // given (준비)
         Equipment equipment = Equipment.builder()
-                .equipment_id(1L)
+                .equipmentId(1L)
                 .build();
 
         String userId = "user123";
@@ -59,7 +59,7 @@ class WorkLogsServiceTest {
 
         Member member = Member.builder().userId(userId).build();
         Work_logs existingLog = Work_logs.builder()
-                .log_id(logId)
+                .logId(logId)
                 .title("원래 제목")
                 .member(member)
                 .equipment(equipment)

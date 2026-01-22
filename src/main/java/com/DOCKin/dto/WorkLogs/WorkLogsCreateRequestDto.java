@@ -29,6 +29,4 @@ public class WorkLogsCreateRequestDto {
     @NotNull(message = "관련 장비 ID는 필수입니다.")
     private Long equipmentId;
 
-    //private LocalDateTime createdAt;
-    //private LocalDateTime updatedAt;
 }

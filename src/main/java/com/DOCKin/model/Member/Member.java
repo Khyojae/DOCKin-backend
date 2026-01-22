@@ -40,15 +40,4 @@ public class Member {
     @Column(nullable = false, length = 100)
     private String shipYardArea;
 
-
-
-
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
-
-    public void updatePassword(String encodedPassword) {
-        this.password = encodedPassword;
-    }
 }

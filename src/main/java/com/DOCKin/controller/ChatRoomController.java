@@ -42,7 +42,7 @@ public class ChatRoomController {
     @GetMapping("/rooms")
     public ResponseEntity<Page<ChatRoomResponseDto>> findAllRooms(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(size = 10,direction = Sort.Direction.DESC)Pageable pageable
+            @PageableDefault(size = 20,direction = Sort.Direction.DESC)Pageable pageable
             ) {
         String userId = customUserDetails.getMember().getUserId();
         return ResponseEntity.ok(chatRoomService.getChatRooms(userId,pageable));

@@ -1,6 +1,5 @@
 package com.DOCKin.dto.chat;
 
-import com.DOCKin.model.Chat.ChatRooms;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 

@@ -25,6 +25,5 @@ public class WorkLogsUpdateRequestDto {
     @Schema(description = "관련 장비 고유 ID", example = "50")
     private Long equipmentId;
 
-    //private LocalDateTime createdAt;
-    //private LocalDateTime updatedAt;
+
 }

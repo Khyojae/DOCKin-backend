@@ -3,7 +3,6 @@ package com.DOCKin.global.config;
 import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.global.security.jwt.JwtUtil;
-import com.DOCKin.repository.Member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {
     private final JwtUtil jwtUtil;
-    private final MemberRepository memberRepository;
 
     // 접속 중인 세션 관리 (sessionId -> userId)
     private static final Map<String, String> onlineUsers = new ConcurrentHashMap<>();

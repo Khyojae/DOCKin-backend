@@ -37,7 +37,7 @@ public class SafetyCourseWorkerResponseDto {
                 .videoUrl(safetyCourse.getVideoUrl())
                 .durationMinutes(safetyCourse.getDurationMinutes())
                 .status(enrollment != null ? enrollment.getStatus() : CompletedLabel.UNWATCHED)
-                .completionDate(enrollment != null ? enrollment.getCompletion_date() : null)
+                .completionDate(enrollment != null ? enrollment.getCompletionDate() : null)
                 .build();
     }
 }

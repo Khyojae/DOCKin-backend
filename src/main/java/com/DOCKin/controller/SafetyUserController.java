@@ -4,7 +4,6 @@ import com.DOCKin.dto.SafetyCourse.SafetyCourseResponseDto;
 import com.DOCKin.dto.SafetyCourse.SafetyCourseWorkerResponseDto;
 import com.DOCKin.dto.SafetyCourse.SafetyWatchStatusRequestDto;
 import com.DOCKin.global.security.auth.CustomUserDetails;
-import com.DOCKin.repository.SafetyCourse.SafetyEnrollmentRepository;
 import com.DOCKin.service.SafetyCourseService;
 import com.DOCKin.service.SafetyTrainingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +48,7 @@ public class SafetyUserController {
 
     @Operation(summary="전체 교육 자료 조회",description = "전체 교육 자료를 조회할 수 있음")
     @GetMapping("/courses")
-    public ResponseEntity<Page<SafetyCourseResponseDto>> getAllCourses(@PageableDefault(size = 10,
+    public ResponseEntity<Page<SafetyCourseResponseDto>> getAllCourses(@PageableDefault(size = 20,
             sort = "courseId",direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(safetyCourseService.readSafetyCourse(pageable));
     }
@@ -58,7 +57,7 @@ public class SafetyUserController {
     @GetMapping("/courses/user/{userId}")
     public ResponseEntity<Page<SafetyCourseResponseDto>> getCourseDetail(
             @PathVariable String userId,
-            @PageableDefault(size = 10,
+            @PageableDefault(size = 20,
                     sort = "courseId",
                     direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(safetyCourseService.searchOtherSafetyCourse(userId,pageable));
@@ -67,7 +66,7 @@ public class SafetyUserController {
     @Operation(summary = "키워드로 검색하기",description = "키워드로 제목이나 내용을 검색할 수 있음")
     @GetMapping("/courses/search")
     public ResponseEntity<Page<SafetyCourseResponseDto>> searchByKeyword(String keyword,
-                                                                         @PageableDefault(size= 10,
+                                                                         @PageableDefault(size= 20,
                                                                                  sort="courseId",
                                                                                  direction= Sort.Direction.DESC) Pageable pageable){
         return ResponseEntity.ok(safetyCourseService.searchSafetyCourse(keyword,pageable));

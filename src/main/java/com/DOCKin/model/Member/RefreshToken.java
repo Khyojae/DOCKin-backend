@@ -18,7 +18,4 @@ public class RefreshToken {
     @Column(name = "token", nullable = false, length = 512)
     private String token;
 
-    public void updateToken(String newToken) {
-        this.token = newToken;
-    }
 }
