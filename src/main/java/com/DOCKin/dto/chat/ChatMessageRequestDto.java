@@ -21,7 +21,8 @@ public class ChatMessageRequestDto {
     @NotBlank(message="보내는 사람의 사원번호는 필수입니다.")
     private String senderId;
 
-    @Schema(description = "보내는 내용")
+    @Schema(description = "보내는 내용",requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message="메시지 내용의 기입은 필수입니다.")
     private String content;
 
     @Schema(description = "보낼 메시지 종류 (TEXT/IMAGE/FILE)",example = "File",requiredMode = Schema.RequiredMode.REQUIRED)

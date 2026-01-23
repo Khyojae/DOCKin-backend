@@ -25,7 +25,7 @@ public class MemberRequestDto {
     @NotBlank(message="비밀번호는 필수 입력 값입니다.")
     private String password;
 
-    @Schema(description = "사용자 권한", example = "USER")
+    @Schema(description = "사용자 권한", example = "USER",requiredMode = Schema.RequiredMode.REQUIRED)
     private UserRole role;
 
     @Schema(description = "언어 설정 코드", example = "ko", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -19,7 +19,8 @@ public class SafetyCourseCreateRequestDto {
     @NotBlank(message = "교육 제목은 필수입니다.")
     private String title;
 
-    @Schema(description = "교육 상세 설명")
+    @Schema(description = "교육 상세 설명",requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "교육 설명은 필수입니다.")
     private String description;
 
     @Schema(description = "교육 영상 URL", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -22,7 +22,7 @@ public class SafetyCourseResponseDto {
     @Schema(description = "교육 제목", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
 
-    @Schema(description = "교육 상세 설명")
+    @Schema(description = "교육 상세 설명", requiredMode = Schema.RequiredMode.REQUIRED)
     private String description;
 
     @Schema(description = "교육 영상 주소", requiredMode = Schema.RequiredMode.REQUIRED)

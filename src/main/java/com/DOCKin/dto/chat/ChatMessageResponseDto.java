@@ -26,7 +26,7 @@ public class ChatMessageResponseDto {
     @Schema(description = "메시지 번호", example = "이건 전역번호로 설정함, 채팅방마다 번호 매기지 x", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long messageId;
 
-    @Schema(description = "보내는 내용")
+    @Schema(description = "보내는 내용",requiredMode = Schema.RequiredMode.REQUIRED)
     private String content;
 
     @Schema(description = "보내는 첨부파일의 주소",example = "파일 보낼 때만 사용함")

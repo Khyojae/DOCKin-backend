@@ -34,13 +34,13 @@ public class ChatRoomResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
 
-    @Schema(description = "마지막 메시지 내용")
+    @Schema(description = "마지막 메시지 내용",requiredMode = Schema.RequiredMode.REQUIRED)
     private String lastMessageContent;
 
-    @Schema(description = "마지막 메시지 시간")
+    @Schema(description = "마지막 메시지 시간",requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime lastMessageAt;
 
-    @Schema(description = "안 읽은 메시지 수")
+    @Schema(description = "안 읽은 메시지 수",requiredMode = Schema.RequiredMode.REQUIRED)
     private long unreadCount;
 
     public static ChatRoomResponseDto from(ChatRooms entity, long unreadCount){
