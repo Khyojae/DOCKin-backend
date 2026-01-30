@@ -25,7 +25,7 @@ public class ChatHistory {
     @Column(name = "reply", columnDefinition = "TEXT", nullable = false)
     private String reply;
 
-    @Column(name = "created_at")
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
 }
