@@ -1,17 +1,17 @@
 package com.DOCKin.DOCKin_spring.service;
 
-import com.DOCKin.dto.WorkLogs.WorkLogsCreateRequestDto;
-import com.DOCKin.dto.WorkLogs.WorkLogsUpdateRequestDto;
-import com.DOCKin.dto.WorkLogs.Work_logsDto;
+import com.DOCKin.worklog.dto.WorkLogsCreateRequestDto;
+import com.DOCKin.worklog.dto.WorkLogsUpdateRequestDto;
+import com.DOCKin.worklog.dto.Work_logsDto;
 import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
-import com.DOCKin.model.WorkLogs.Equipment;
-import com.DOCKin.model.Member.Member;
-import com.DOCKin.model.WorkLogs.Work_logs;
-import com.DOCKin.repository.WorkLogs.EquipmentRepository;
-import com.DOCKin.repository.Member.MemberRepository;
-import com.DOCKin.repository.WorkLogs.Work_logsRepository;
-import com.DOCKin.service.WorkLogsService;
+import com.DOCKin.worklog.model.Equipment;
+import com.DOCKin.member.model.Member;
+import com.DOCKin.worklog.model.Work_logs;
+import com.DOCKin.worklog.repository.EquipmentRepository;
+import com.DOCKin.member.repository.MemberRepository;
+import com.DOCKin.worklog.repository.Work_logsRepository;
+import com.DOCKin.worklog.service.WorkLogsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,12 +1,12 @@
 package com.DOCKin.DOCKin_spring.service;
 
-import com.DOCKin.dto.Member.LogOutRequestDto;
+import com.DOCKin.member.dto.LogOutRequestDto;
 import com.DOCKin.global.security.jwt.JwtBlacklist;
 import com.DOCKin.global.security.jwt.JwtUtil;
-import com.DOCKin.model.Member.Member;
-import com.DOCKin.repository.Member.MemberRepository;
-import com.DOCKin.repository.Member.RefreshTokenRepository;
-import com.DOCKin.service.MemberService;
+import com.DOCKin.member.model.Member;
+import com.DOCKin.member.repository.MemberRepository;
+import com.DOCKin.member.repository.RefreshTokenRepository;
+import com.DOCKin.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

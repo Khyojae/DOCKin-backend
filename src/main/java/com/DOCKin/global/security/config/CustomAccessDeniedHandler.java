@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.access.AccessDeniedException;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import com.DOCKin.dto.ErrorResponseDto;
+import com.DOCKin.global.error.ErrorResponseDto;
 //로그인은 했는데 권한이 없을때
 @Slf4j(topic ="Forbidden_EXCEPTION_HANDLER")
 @AllArgsConstructor

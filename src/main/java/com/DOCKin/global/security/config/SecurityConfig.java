@@ -3,7 +3,7 @@ package com.DOCKin.global.security.config;
 import com.DOCKin.global.security.jwt.JwtAuthFilter;
 import com.DOCKin.global.security.jwt.JwtBlacklist;
 import com.DOCKin.global.security.jwt.JwtUtil;
-import com.DOCKin.service.CustomUserDetailsService;
+import com.DOCKin.member.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,6 @@
 package com.DOCKin.global.security.jwt;
 
-import com.DOCKin.service.CustomUserDetailsService;
+import com.DOCKin.member.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
