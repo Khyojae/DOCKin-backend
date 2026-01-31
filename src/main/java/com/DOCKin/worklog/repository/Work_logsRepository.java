@@ -18,4 +18,6 @@ public interface Work_logsRepository extends JpaRepository<Work_logs, Long> {
 
     @Query("SELECT w FROM Work_logs w WHERE w.title LIKE %:keyword% OR w.logText LIKE %:keyword%")
     Page<Work_logs> searchWorkLogs(@Param("keyword") String keyword, Pageable pageable);
+
+    Long logId(Long logId);
 }

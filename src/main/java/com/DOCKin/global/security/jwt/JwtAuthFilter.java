@@ -33,14 +33,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
         String authHeader = request.getHeader("Authorization");
+        // [로그 1] 헤더가 들어오는지 확인
+        log.info("Request URI: {}, Authorization Header: {}", path, authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
             try {
                 if (jwtUtil.isValidToken(token) && !jwtBlacklist.isBlacklisted(token)) {
-                    // JwtUtil에서 String으로 반환하는 getUserId 호출
                     String userId = jwtUtil.getUserId(token);
 
                     if (userId != null) {
@@ -54,14 +56,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                             userDetails.getAuthorities()
                                     );
                             SecurityContextHolder.getContext().setAuthentication(auth);
+                            // [로그 2] 인증 성공 확인
+                            log.info("인증 성공: user_id = {}", userId);
                         }
                     } else {
-                        log.warn("토큰에서 userId를 추출하는 데 실패했습니다.");
+                        log.warn("토큰에서 userId 추출 실패");
                     }
+                } else {
+                    log.warn("유효하지 않은 토큰이거나 블랙리스트에 등록된 토큰입니다.");
                 }
             } catch (Exception e) {
                 log.error("JWT 인증 에러: {}", e.getMessage());
             }
+        } else {
+            // [로그 3] 토큰이 없는 경우
+            log.warn("Authorization 헤더가 없거나 형식이 잘못되었습니다.");
         }
 
         filterChain.doFilter(request, response);

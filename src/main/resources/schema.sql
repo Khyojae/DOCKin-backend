@@ -249,3 +249,15 @@ CREATE TABLE chat_history (
                               created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+-- 19. 번역된 작업 일지 테이블
+CREATE TABLE work_log_translations (
+                                       translation_id INT PRIMARY KEY AUTO_INCREMENT,
+                                       log_id INT NOT NULL,                    -- 원본 작업 일지 ID
+                                       language_code VARCHAR(10) NOT NULL,     -- 언어 코드 (th, vi, en 등)
+                                       translated_title VARCHAR(256),          -- 번역된 제목
+                                       translated_text TEXT NOT NULL,          -- 번역된 본문 내용
+                                       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                       FOREIGN KEY (log_id) REFERENCES work_logs(log_id) ON DELETE CASCADE,
+                                       UNIQUE KEY uk_log_lang (log_id, language_code)
+);
