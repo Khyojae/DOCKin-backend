@@ -61,7 +61,7 @@ public class fastApiService {
                                 onlineTranslateDomain.TranslationResult result =
                                         new onlineTranslateDomain.TranslationResult(
                                                 recognizedText,
-                                                transResponse.content()
+                                                transResponse.translated()
                                         );
 
                                 return new onlineTranslateDomain.RtTranslateResponse(traceId, result);

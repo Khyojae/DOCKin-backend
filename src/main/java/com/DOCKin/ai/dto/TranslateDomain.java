@@ -19,7 +19,7 @@ public class TranslateDomain{
     //작업일지 응답 
     public record Response(
             String title,
-            String content,
+            String translated,
             String model,
             String traceId){}
 }
