@@ -2,6 +2,7 @@ package com.DOCKin.ai.service;
 
 import com.DOCKin.ai.dto.ChatDomain;
 import com.DOCKin.ai.dto.TranslateDomain;
+import com.DOCKin.ai.dto.onlineTranslateDomain;
 import com.DOCKin.ai.model.ChatLog;
 import com.DOCKin.ai.model.TranslateLog;
 import com.DOCKin.ai.repository.ChatLogRepository;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -29,8 +31,45 @@ public class fastApiService {
     private final WebClient fastApiWebClient;
     private final Work_logsRepository workLogsRepository;
     private final TranslateRepository translateRepository;
+    private final SttService sttService;
 
-    // 1. 챗봇 통신 (순수하게 결과만 리턴)
+    //1. 그냥 번역 api
+    public Mono<TranslateDomain.Response> translateForRealTime(TranslateDomain.ApiRequest request){
+        return fastApiWebClient.post()
+                .uri("/api/translate")
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status->status.isError(), clientResponse->
+                        Mono.error(new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR)))
+                .bodyToMono(TranslateDomain.Response.class);
+    }
+
+    //1. 실시간 번역 (stt -> 번역)
+    public Mono<onlineTranslateDomain.RtTranslateResponse> realtimeTranslate(
+            MultipartFile file, String source, String target, String traceId, String token){
+
+        return sttService.processStt(file,traceId,token,source)
+                .flatMap(sttResponse->{
+                    String recognizedText = sttResponse.text();
+
+                    TranslateDomain.ApiRequest apiRequest = new TranslateDomain.ApiRequest(
+                            recognizedText, source, target, traceId
+                    );
+
+                    return translateForRealTime(apiRequest)
+                            .map(transResponse -> {
+                                onlineTranslateDomain.TranslationResult result =
+                                        new onlineTranslateDomain.TranslationResult(
+                                                recognizedText,
+                                                transResponse.content()
+                                        );
+
+                                return new onlineTranslateDomain.RtTranslateResponse(traceId, result);
+                            });
+                });
+    }
+
+    // 2. 챗봇 통신 (순수하게 결과만 리턴)
     public Mono<ChatDomain.Response> chatBotFromSpringToFastApi(ChatDomain.Request request, String userId) {
         return fastApiWebClient.post()
                 .uri("/api/chatbot")
@@ -42,7 +81,7 @@ public class fastApiService {
                 .map(apiResult -> new ChatDomain.Response(request.traceId(), apiResult));
     }
 
-    // 2. 챗봇 로그 저장 (컨트롤러에서 호출)
+    //  챗봇 로그 저장 (컨트롤러에서 호출)
     @Transactional
     public void saveChatLog(ChatDomain.Request request, ChatDomain.Response response, String userId) {
         ChatLog log = ChatLog.builder()
@@ -54,7 +93,7 @@ public class fastApiService {
         chatLogRepository.save(log);
     }
 
-    // 3. 번역 통신 (DB 조회를 밖으로 빼고 통신만 담당)
+    // 3. 작업일지 번역 (통신만)
     public Mono<TranslateDomain.Response> translateLogFromSpringToFastApi(TranslateDomain.Request request) {
         return fastApiWebClient.post()
                 .uri("/api/translate")
@@ -71,6 +110,7 @@ public class fastApiService {
                 .bodyToMono(TranslateDomain.Response.class);
     }
 
+    // 작업일지 번역된거 저장
     @Transactional
     public TranslateDomain.Response saveTranslateLog(Long logId, TranslateDomain.Request request, String userId) {
         // 1. 원본 로그 조회
