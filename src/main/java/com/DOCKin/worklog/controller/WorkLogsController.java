@@ -1,5 +1,7 @@
 package com.DOCKin.worklog.controller;
 
+import com.DOCKin.ai.dto.SttDomain;
+import com.DOCKin.ai.service.SttService;
 import com.DOCKin.worklog.dto.WorkLogsCreateRequestDto;
 import com.DOCKin.worklog.dto.WorkLogsUpdateRequestDto;
 import com.DOCKin.worklog.dto.Work_logsDto;
@@ -14,10 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 
 @Tag(name="작업일지 CRUD",description = "작업일지 CRUD가 가능함")
@@ -31,10 +37,23 @@ public class WorkLogsController {
     @Operation(summary="특정 작업자 작업일지 생성",description = "특정 작업자의 작업일지를 생성해줌")
     @PostMapping
     public ResponseEntity<Work_logsDto> createWorkLog( @AuthenticationPrincipal CustomUserDetails customUserDetails,
-          @Valid @RequestBody WorkLogsCreateRequestDto requestDto
+                                                       @Valid @RequestBody WorkLogsCreateRequestDto requestDto
     ){
         String userId = customUserDetails.getMember().getUserId();
-      Work_logsDto response =  workLogsService.createWorklog(userId,requestDto);
+        Work_logsDto response =  workLogsService.createWorklog(userId,requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    @Operation(summary="Stt용 특정 작업자 작업일지 생성",description = "특정 작업자의 작업일지를 생성해줌")
+    @PostMapping(value= "/stt",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Work_logsDto> createWorkLog( @AuthenticationPrincipal CustomUserDetails customUserDetails,
+        @RequestPart(value="request") @Valid WorkLogsCreateRequestDto requestDto,
+                                                       @RequestPart(value="file",required = false) MultipartFile file,
+                                                       @RequestHeader(HttpHeaders.AUTHORIZATION) String token
+    ){
+        String userId = customUserDetails.getMember().getUserId();
+      Work_logsDto response =  workLogsService.createSttWorklog(userId,requestDto,file,token);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

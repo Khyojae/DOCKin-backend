@@ -1,5 +1,6 @@
 package com.DOCKin.worklog.service;
 
+import com.DOCKin.ai.service.SttService;
 import com.DOCKin.worklog.dto.WorkLogsCreateRequestDto;
 import com.DOCKin.worklog.dto.WorkLogsUpdateRequestDto;
 import com.DOCKin.worklog.dto.Work_logsDto;
@@ -12,21 +13,25 @@ import com.DOCKin.worklog.repository.EquipmentRepository;
 import com.DOCKin.member.repository.MemberRepository;
 import com.DOCKin.worklog.repository.Work_logsRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class WorkLogsService {
 
     private final Work_logsRepository workLogsRepository;
     private final MemberRepository memberRepository;
     private final EquipmentRepository equipmentRepository;
+    private final SttService sttService;
 
     //게시물 작성
     @Transactional
@@ -42,6 +47,46 @@ public class WorkLogsService {
                 .logText(dto.getLogText())
                 .imageUrl(dto.getImageUrl())
                 .equipment(equipment)
+                .member(member)
+                .build();
+
+        return Work_logsDto.from(workLogsRepository.save(work_logs));
+    }
+
+
+    //stt용게시물 작성
+    @Transactional
+    public Work_logsDto createSttWorklog(String userId, WorkLogsCreateRequestDto dto, MultipartFile file,String token){
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Equipment equipment = equipmentRepository.findById(dto.getEquipmentId())
+                .orElseThrow(()->new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND));
+
+        String finalLogText = dto.getLogText();
+        String finalAudioUrl = dto.getAudioFileUrl();
+
+        if(file!=null && !file.isEmpty()){
+            try{
+                var sttResponse = sttService.processStt(file,"trace-"+userId,token,"ko").block();
+
+                log.info("STT Response 객체: {}", sttResponse);
+
+                if(sttResponse !=null && sttResponse.text()!=null){
+                    finalLogText = sttResponse.text();
+                }
+                finalAudioUrl = "uploaded_"+file.getOriginalFilename();
+            } catch(Exception e){
+                log.error("stt변환 실패:{}"+e.getMessage());
+            }
+        }
+
+        Work_logs work_logs = Work_logs.builder()
+                .title(dto.getTitle())
+                .logText(finalLogText)
+                .imageUrl(dto.getImageUrl())
+                .equipment(equipment)
+                .audioFileUrl(finalAudioUrl)
                 .member(member)
                 .build();
 

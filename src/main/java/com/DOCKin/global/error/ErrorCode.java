@@ -39,8 +39,8 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(404, "W004", "존재하지 않는 댓글입니다."),
 
     // FastApi
-    CHATBOT_NOT_WORK(404, "F001", "챗봇이 에러가 발생했습니다.");
-
+    CHATBOT_NOT_WORK(404, "F001", "챗봇이 에러가 발생했습니다."),
+    STT_CONVERSION_ERROR(404, "F002", "STT에서ㅁ 에러가 발생했습니다.");
 
 
     private final int status;

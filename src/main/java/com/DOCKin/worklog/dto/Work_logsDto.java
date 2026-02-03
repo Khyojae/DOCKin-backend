@@ -39,6 +39,8 @@ public class Work_logsDto {
     @Schema(description = "수정 일시", example = "2026-01-12T15:30:00")
     private LocalDateTime updatedAt;
 
+    private String audioFileUrl;
+
     public static Work_logsDto from(Work_logs entity) {
         return Work_logsDto.builder()
                 .logId(entity.getLogId())
@@ -47,6 +49,7 @@ public class Work_logsDto {
                 .title(entity.getTitle())
                 .logText(entity.getLogText())
                 .imageUrl(entity.getImageUrl())
+                .audioFileUrl(entity.getAudioFileUrl())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
