@@ -2,8 +2,7 @@
 
 ## 📂 Directory Structure 
 
-<details>
-<summary><b>📂 백엔드 상세 폴더 구조 보기 (Project Structure)</b></summary>
+<b>📂 백엔드 상세 폴더 구조 (Project Structure)</b>
 <br />
 
 ```bash
@@ -32,14 +31,12 @@
 └── Dockerfile              # 백엔드 컨테이너 빌드 설정
 
 ```
-</details>
 
 
 
 ## 📖 API Documentation 
 
-<details>
-<summary><b>🚀 상세 API 엔드포인트 보기 (Endpoints Specification)</b></summary>
+<b>🚀 상세 API 엔드포인트 보기 (Endpoints Specification)</b>
 <br />
 
 ### 👤 인증 및 계정 (Auth)
@@ -84,18 +81,14 @@
 | `GET` | `/api/safety/user/training/uncompleted` | 미이수 안전 교육 목록 확인 |
 | `PATCH` | `/api/safety/user/training/complete` | 교육 영상 이수 완료 처리 |
 
-</details>
 
 ## 📂 Database 
 
-<details>
-<summary><b>📊 MySQL</b></summary>
+<b>📊 MySQL</b>
 <br />
 
-> 추후 ERD 및 테이블 명세서가 이곳에 추가될 예정입니다.
-
-</details>
 
 
 
----
+
+
