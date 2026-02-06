@@ -35,6 +35,10 @@ services:
       - RACK_ENV=development
       - JAVA_OPTS=-Xmx400M -Xms256M
       - AI_SERVER_URL=${AI_SERVER_URL}
+      - cloud.aws.credentials.access-key=${AWS_ACCESS_KEY}
+      - cloud.aws.credentials.secret-key=${AWS_SECRET_KEY}
+      - cloud.aws.region.static=${AWS_REGION}
+      - cloud.aws.s3.bucket=${S3_BUCKET_NAME}
     volumes:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
