@@ -9,28 +9,26 @@
 -- 안전 관리
 -- refresh_token
 SET FOREIGN_KEY_CHECKS = 0;
-
+DROP TABLE IF EXISTS work_log_translations;
+DROP TABLE IF EXISTS chat_history;
+DROP TABLE IF EXISTS refresh_token;
 DROP TABLE IF EXISTS safety_enrollments;
 DROP TABLE IF EXISTS safety_courses;
-DROP TABLE IF EXISTS emergency_contacts;
 DROP TABLE IF EXISTS chat_messages;
 DROP TABLE IF EXISTS chat_members;
 DROP TABLE IF EXISTS chat_rooms;
 DROP TABLE IF EXISTS absence_requests;
 DROP TABLE IF EXISTS attendance;
-DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS checklist_results;
 DROP TABLE IF EXISTS checklist_items;
 DROP TABLE IF EXISTS checklists;
+DROP TABLE IF EXISTS work_log_views;
+DROP TABLE IF EXISTS work_log_comments;
+DROP TABLE IF EXISTS work_log_images;
 DROP TABLE IF EXISTS work_logs;
 DROP TABLE IF EXISTS equipment;
 DROP TABLE IF EXISTS Authority;
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS refresh_token;
-ALTER TABLE attendance ADD COLUMN total_work_time VARCHAR(20) DEFAULT NULL;
-ALTER TABLE translate_logs
-    ADD COLUMN original_title VARCHAR(256) AFTER trace_id,
-ADD COLUMN translated_title VARCHAR(256) AFTER original_title;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- 1. 사용자
@@ -64,19 +62,27 @@ CREATE TABLE equipment (
                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
--- 4. 작업 일지 (음성 → 텍스트 저장)
+
+-- 4. 작업 일지 (image_url 컬럼 제거)
 CREATE TABLE work_logs (
                            log_id INT PRIMARY KEY AUTO_INCREMENT,
                            user_id VARCHAR(50),
                            title VARCHAR(256) NOT NULL,
                            equipment_id INT,
                            log_text TEXT NOT NULL,
-                           image_url VARCHAR(255),
                            audio_file_url VARCHAR(255),
                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
                            FOREIGN KEY (equipment_id) REFERENCES equipment(equipment_id)
+);
+
+-- 4-1. 작업 일지 이미지 (사진 여러 장 저장을 위해 새로 추가)
+CREATE TABLE work_log_images (
+                                 id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                 image_url VARCHAR(500) NOT NULL,
+                                 work_log_id INT NOT NULL,
+                                 FOREIGN KEY (work_log_id) REFERENCES work_logs(log_id) ON DELETE CASCADE
 );
 
 -- 5. 작업 일지 댓글
@@ -147,7 +153,7 @@ CREATE TABLE attendance (
                             clock_out_time DATETIME,
                             work_date DATE NOT NULL,
                             role ENUM('NORMAL','LATE','ABSENT','VACATION','SICK'),
-
+                            total_work_time VARCHAR(20) DEFAULT NULL,
                             in_location VARCHAR(255),
                             out_location VARCHAR(255),
                             CONSTRAINT fk_attendance_member FOREIGN KEY (user_id) REFERENCES users (user_id),
@@ -256,10 +262,12 @@ CREATE TABLE chat_history (
 -- 19. 번역된 작업 일지 테이블
 CREATE TABLE work_log_translations (
                                        translation_id INT PRIMARY KEY AUTO_INCREMENT,
-                                       log_id INT NOT NULL,                    -- 원본 작업 일지 ID
-                                       language_code VARCHAR(10) NOT NULL,     -- 언어 코드 (th, vi, en 등)
-                                       translated_title VARCHAR(256),          -- 번역된 제목
-                                       translated_text TEXT NOT NULL,          -- 번역된 본문 내용
+                                       log_id INT NOT NULL,
+                                       language_code VARCHAR(10) NOT NULL,
+                                       translated_title VARCHAR(256),
+                                       original_title VARCHAR(256),
+                                       translated_title VARCHAR(256),
+                                       translated_text TEXT NOT NULL,
                                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                        FOREIGN KEY (log_id) REFERENCES work_logs(log_id) ON DELETE CASCADE,
                                        UNIQUE KEY uk_log_lang (log_id, language_code)

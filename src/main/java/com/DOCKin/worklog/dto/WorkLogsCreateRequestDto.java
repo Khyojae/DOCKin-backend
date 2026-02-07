@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,7 +25,7 @@ public class WorkLogsCreateRequestDto {
     private String logText;
 
     @Schema(description = "첨부 이미지 URL")
-    private String imageUrl;
+    private List<String> imageUrls;
 
     @Schema(description = "관련 장비 고유 ID", example = "50", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "관련 장비 ID는 필수입니다.")

@@ -1,5 +1,6 @@
 package com.DOCKin.worklog.dto;
 
+import com.DOCKin.worklog.model.WorkLogImage;
 import com.DOCKin.worklog.model.Work_logs;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -31,7 +34,7 @@ public class Work_logsDto {
     private String logText;
 
     @Schema(description = "첨부 이미지 URL")
-    private String imageUrl;
+    private List<String> imageUrls;
 
     @Schema(description = "작성 일시", example = "2026-01-12T10:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime createdAt;
@@ -48,7 +51,9 @@ public class Work_logsDto {
                 .equipmentId(entity.getEquipment().getEquipmentId())
                 .title(entity.getTitle())
                 .logText(entity.getLogText())
-                .imageUrl(entity.getImageUrl())
+                .imageUrls(entity.getImages().stream()
+                        .map(WorkLogImage::getImageUrl)
+                        .collect(Collectors.toList()))
                 .audioFileUrl(entity.getAudioFileUrl())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())

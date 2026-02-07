@@ -1,6 +1,7 @@
 package com.DOCKin.worklog.service;
 
 import com.DOCKin.ai.service.SttService;
+import com.DOCKin.global.file.S3PresignedService;
 import com.DOCKin.worklog.dto.WorkLogsCreateRequestDto;
 import com.DOCKin.worklog.dto.WorkLogsUpdateRequestDto;
 import com.DOCKin.worklog.dto.Work_logsDto;
@@ -8,6 +9,7 @@ import com.DOCKin.global.error.BusinessException;
 import com.DOCKin.global.error.ErrorCode;
 import com.DOCKin.worklog.model.Equipment;
 import com.DOCKin.member.model.Member;
+import com.DOCKin.worklog.model.WorkLogImage;
 import com.DOCKin.worklog.model.Work_logs;
 import com.DOCKin.worklog.repository.EquipmentRepository;
 import com.DOCKin.member.repository.MemberRepository;
@@ -32,10 +34,11 @@ public class WorkLogsService {
     private final MemberRepository memberRepository;
     private final EquipmentRepository equipmentRepository;
     private final SttService sttService;
+    private final S3PresignedService s3PresignedService;
 
     //게시물 작성
     @Transactional
-    public Work_logsDto createWorklog(String userId,WorkLogsCreateRequestDto dto){
+    public Work_logsDto createWorklog(String userId,WorkLogsCreateRequestDto dto,List<MultipartFile> images){
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -45,10 +48,23 @@ public class WorkLogsService {
         Work_logs work_logs = Work_logs.builder()
                 .title(dto.getTitle())
                 .logText(dto.getLogText())
-                .imageUrl(dto.getImageUrl())
                 .equipment(equipment)
                 .member(member)
                 .build();
+
+        if(images !=null && !images.isEmpty()){
+            images.forEach(file->{
+
+                String uploadedUrl = s3PresignedService.uploadImage(file);
+
+                WorkLogImage image = WorkLogImage.builder()
+                        .imageUrl(uploadedUrl)
+                        .workLog(work_logs)
+                        .build();
+
+                work_logs.addImage(image);
+            });
+        }
 
         return Work_logsDto.from(workLogsRepository.save(work_logs));
     }
@@ -56,7 +72,7 @@ public class WorkLogsService {
 
     //stt용게시물 작성
     @Transactional
-    public Work_logsDto createSttWorklog(String userId, WorkLogsCreateRequestDto dto, MultipartFile file,String token){
+    public Work_logsDto createSttWorklog(String userId, WorkLogsCreateRequestDto dto, MultipartFile file,String token, List<MultipartFile> images){
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -84,11 +100,24 @@ public class WorkLogsService {
         Work_logs work_logs = Work_logs.builder()
                 .title(dto.getTitle())
                 .logText(finalLogText)
-                .imageUrl(dto.getImageUrl())
                 .equipment(equipment)
                 .audioFileUrl(finalAudioUrl)
                 .member(member)
                 .build();
+
+        if(images !=null && !images.isEmpty()){
+            images.forEach(imagefile->{
+
+                String uploadedUrl = s3PresignedService.uploadImage(imagefile);
+
+                WorkLogImage image = WorkLogImage.builder()
+                        .imageUrl(uploadedUrl)
+                        .workLog(work_logs)
+                        .build();
+
+                work_logs.addImage(image);
+            });
+        }
 
          return Work_logsDto.from(workLogsRepository.save(work_logs));
     }
@@ -136,7 +165,7 @@ public class WorkLogsService {
 
     //게시물 수정
     @Transactional
-    public Work_logsDto updateWorklog(String userId, Long logId, WorkLogsUpdateRequestDto dto){
+    public Work_logsDto updateWorklog(String userId, Long logId, WorkLogsUpdateRequestDto dto, List<MultipartFile> images){
         Work_logs logs = workLogsRepository.findById(logId)
                 .orElseThrow(()->new BusinessException(ErrorCode.LOG_NOT_FOUND));
 
@@ -147,7 +176,21 @@ public class WorkLogsService {
 
         if(dto.getTitle()!=null) logs.setTitle(dto.getTitle());
         if(dto.getLogText()!=null) logs.setLogText(dto.getLogText());
-        if(dto.getImageUrl()!=null) logs.setImageUrl(dto.getImageUrl());
+        if(images !=null && !images.isEmpty()){
+            logs.getImages().clear();
+
+            images.forEach(imagefile->{
+
+                String uploadedUrl = s3PresignedService.uploadImage(imagefile);
+
+                WorkLogImage image = WorkLogImage.builder()
+                        .imageUrl(uploadedUrl)
+                        .workLog(logs)
+                        .build();
+
+                logs.addImage(image);
+            });
+        }
         if(dto.getEquipmentId()!=null){
             Equipment equipment = equipmentRepository.findById(dto.getEquipmentId())
                     .orElseThrow(()->new BusinessException(ErrorCode.EQUIPMENT_NOT_FOUND));

@@ -33,8 +33,6 @@ public class Work_logs {
 
     private String audioFileUrl;
 
-    private String imageUrl;
-
     @CreatedDate
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
@@ -54,4 +52,14 @@ public class Work_logs {
     @Builder.Default
     @OneToMany(mappedBy = "logId",cascade=CascadeType.ALL,orphanRemoval = true)
     private List<Comment> comments =new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "workLog", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<WorkLogImage> images = new ArrayList<>();
+
+    public void addImage(WorkLogImage image){
+        this.images.add(image);
+        image.setWorkLog(this);
+    }
+
 }

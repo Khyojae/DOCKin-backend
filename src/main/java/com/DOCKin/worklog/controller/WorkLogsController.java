@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 
 @Tag(name="작업일지 CRUD",description = "작업일지 CRUD가 가능함")
 @Slf4j
@@ -34,13 +36,14 @@ import reactor.core.publisher.Mono;
 public class WorkLogsController {
     private final WorkLogsService workLogsService;
 
-    @Operation(summary="특정 작업자 작업일지 생성",description = "특정 작업자의 작업일지를 생성해줌")
-    @PostMapping
-    public ResponseEntity<Work_logsDto> createWorkLog( @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                       @Valid @RequestBody WorkLogsCreateRequestDto requestDto
-    ){
+    @Operation(summary="특정 작업자 작업일지 생성(사진 포함)",description = "특정 작업자의 작업일지를 생성해줌")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Work_logsDto> createWorkLog(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                      @Valid @RequestPart(value="requestDto") WorkLogsCreateRequestDto requestDto,
+                                                      @RequestPart(value="images", required=false)List<MultipartFile> images
+                                                      ){
         String userId = customUserDetails.getMember().getUserId();
-        Work_logsDto response =  workLogsService.createWorklog(userId,requestDto);
+        Work_logsDto response =  workLogsService.createWorklog(userId,requestDto,images);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -50,10 +53,11 @@ public class WorkLogsController {
     public ResponseEntity<Work_logsDto> createWorkLog( @AuthenticationPrincipal CustomUserDetails customUserDetails,
         @RequestPart(value="request") @Valid WorkLogsCreateRequestDto requestDto,
                                                        @RequestPart(value="file",required = false) MultipartFile file,
-                                                       @RequestHeader(HttpHeaders.AUTHORIZATION) String token
+                                                       @RequestHeader(HttpHeaders.AUTHORIZATION) String token,
+                                                       @RequestPart(value="images",required = false) List<MultipartFile> images
     ){
         String userId = customUserDetails.getMember().getUserId();
-      Work_logsDto response =  workLogsService.createSttWorklog(userId,requestDto,file,token);
+      Work_logsDto response =  workLogsService.createSttWorklog(userId,requestDto,file,token,images);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -79,10 +83,11 @@ public class WorkLogsController {
     @Operation(summary="특정 작업자 작업일지 수정",description = "특정 작업자의 작업일지를 수정해줌")
     @PutMapping("/{logId}")
     public ResponseEntity<Work_logsDto> PutMyWorkLog(@PathVariable Long logId,
-                                                     @Valid @RequestBody WorkLogsUpdateRequestDto request,
-                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails){
+                                                     @Valid @RequestPart(value = "requestDto") WorkLogsUpdateRequestDto request,
+                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                     @RequestPart(value="images", required = false) List<MultipartFile> images){
         String userId = customUserDetails.getMember().getUserId();
-        Work_logsDto response = workLogsService.updateWorklog(userId,logId,request);
+        Work_logsDto response = workLogsService.updateWorklog(userId,logId,request,images);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

@@ -40,7 +40,7 @@ public enum ErrorCode {
 
     // FastApi
     CHATBOT_NOT_WORK(404, "F001", "챗봇이 에러가 발생했습니다."),
-    STT_CONVERSION_ERROR(404, "F002", "STT에서ㅁ 에러가 발생했습니다.");
+    STT_CONVERSION_ERROR(404, "F002", "STT에서 에러가 발생했습니다.");
 
 
     private final int status;

@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @Builder
 @Setter
@@ -20,7 +22,7 @@ public class WorkLogsUpdateRequestDto {
     private String logText;
 
     @Schema(description = "첨부 이미지 URL (변경 시에만 입력)")
-    private String imageUrl;
+    private List<String> imageUrls;
 
     @Schema(description = "관련 장비 고유 ID", example = "50")
     private Long equipmentId;

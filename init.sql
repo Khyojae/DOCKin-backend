@@ -147,14 +147,16 @@ DROP TABLE IF EXISTS `chat_messages`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `chat_messages` (
-  `message_id` bigint NOT NULL AUTO_INCREMENT,
-  `room_id` int NOT NULL,
-  `sender_id` varchar(50) NOT NULL,
-  `content` text NOT NULL,
-  `sent_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`message_id`),
-  KEY `idx_room_sent` (`room_id`,`sent_at`),
-  CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `chat_rooms` (`room_id`) ON DELETE CASCADE
+                                 `message_id` bigint NOT NULL AUTO_INCREMENT,
+                                 `room_id` int NOT NULL,
+                                 `sender_id` varchar(50) NOT NULL,
+                                 `content` text NOT NULL,
+                                 `sent_at` datetime DEFAULT CURRENT_TIMESTAMP,
+                                 PRIMARY KEY (`message_id`),
+                                 KEY `idx_room_sent` (`room_id`,`sent_at`),
+                                 KEY `fk_chat_sender_idx` (`sender_id`), -- sender_id로 검색을 빠르게 하기 위한 인덱스
+                                 CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`room_id`) REFERENCES `chat_rooms` (`room_id`) ON DELETE CASCADE,
+                                 CONSTRAINT `fk_chat_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -461,19 +463,19 @@ DROP TABLE IF EXISTS `work_logs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `work_logs` (
-  `log_id` int NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(50) DEFAULT NULL,
-  `title` varchar(256) NOT NULL,
-  `equipment_id` int DEFAULT NULL,
-  `log_text` text NOT NULL,
-  `audio_file_url` varchar(255) DEFAULT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`log_id`),
-  KEY `user_id` (`user_id`),
-  KEY `equipment_id` (`equipment_id`),
-  CONSTRAINT `work_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  CONSTRAINT `work_logs_ibfk_2` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`)
+                             `log_id` int NOT NULL AUTO_INCREMENT,
+                             `user_id` varchar(50) DEFAULT NULL,
+                             `title` varchar(256) NOT NULL,
+                             `equipment_id` int DEFAULT NULL,
+                             `log_text` text NOT NULL,
+                             `audio_file_url` varchar(255) DEFAULT NULL,
+                             `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+                             `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                             PRIMARY KEY (`log_id`),
+                             KEY `user_id` (`user_id`),
+                             KEY `equipment_id` (`equipment_id`),
+                             CONSTRAINT `work_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+                             CONSTRAINT `work_logs_ibfk_2` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -494,6 +496,18 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+DROP TABLE IF EXISTS `work_log_images`;
+CREATE TABLE `work_log_images` (
+                                   `id` bigint NOT NULL AUTO_INCREMENT,
+                                   `image_url` varchar(500) NOT NULL,   -- S3 URL이 길 수 있으므로 500자 권장
+                                   `work_log_id` int NOT NULL,          -- Work_logs의 log_id 참조
+                                   PRIMARY KEY (`id`),
+                                   KEY `fk_work_log_image_parent` (`work_log_id`),
+                                   CONSTRAINT `fk_work_log_image_parent`
+                                       FOREIGN KEY (`work_log_id`) REFERENCES `work_logs` (`log_id`)
+                                           ON DELETE CASCADE                 -- 게시글 삭제 시 사진 데이터도 삭제
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dump completed on 2026-01-08  8:37:53
 
@@ -518,16 +532,18 @@ CREATE TABLE `chat_history` (
 
 DROP TABLE IF EXISTS `translate_logs`;
 
+-- 번역 로그 테이블 (기존 유지하되 제약 조건 확인)
+DROP TABLE IF EXISTS `translate_logs`;
 CREATE TABLE `translate_logs` (
                                   `id` bigint NOT NULL AUTO_INCREMENT,
-                                  `log_id` int NOT NULL,                   -- work_logs 테이블 참조
-                                  `user_id` varchar(50) DEFAULT NULL,      -- 번역 요청자
-                                  `trace_id` varchar(255) DEFAULT NULL,    -- 로그 추적 ID
-                                  `target_lang` varchar(10) NOT NULL,      -- 목적 언어 (en, th 등)
-                                  `original_title` varchar(256),           -- 원문 제목 (추가)
-                                  `translated_title` varchar(256),         -- 번역된 제목 (추가)
-                                  `original_text` text NOT NULL,           -- 원문 본문
-                                  `translated_text` text NOT NULL,         -- 번역된 본문
+                                  `log_id` int NOT NULL,
+                                  `user_id` varchar(50) DEFAULT NULL,
+                                  `trace_id` varchar(255) DEFAULT NULL,
+                                  `target_lang` varchar(10) NOT NULL,
+                                  `original_title` varchar(256),
+                                  `translated_title` varchar(256),
+                                  `original_text` text NOT NULL,
+                                  `translated_text` text NOT NULL,
                                   `created_at` datetime(6) DEFAULT CURRENT_TIMESTAMP(6),
                                   PRIMARY KEY (`id`),
                                   KEY `fk_trans_log` (`log_id`),
