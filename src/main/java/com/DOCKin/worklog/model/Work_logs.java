@@ -59,6 +59,7 @@ public class Work_logs {
 
     public void addImage(WorkLogImage image){
         this.images.add(image);
+        image.setWorkLog(this);
     }
 
 }
