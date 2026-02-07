@@ -39,7 +39,7 @@ public class WorkLogsController {
     @Operation(summary="특정 작업자 작업일지 생성(사진 포함)",description = "특정 작업자의 작업일지를 생성해줌")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Work_logsDto> createWorkLog(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                      @Valid @RequestBody WorkLogsCreateRequestDto requestDto,
+                                                      @Valid @RequestPart(value="requestDto") WorkLogsCreateRequestDto requestDto,
                                                       @RequestPart(value="images", required=false)List<MultipartFile> images
                                                       ){
         String userId = customUserDetails.getMember().getUserId();
@@ -83,7 +83,7 @@ public class WorkLogsController {
     @Operation(summary="특정 작업자 작업일지 수정",description = "특정 작업자의 작업일지를 수정해줌")
     @PutMapping("/{logId}")
     public ResponseEntity<Work_logsDto> PutMyWorkLog(@PathVariable Long logId,
-                                                     @Valid @RequestBody WorkLogsUpdateRequestDto request,
+                                                     @Valid @RequestPart(value = "request") WorkLogsUpdateRequestDto request,
                                                      @AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                      @RequestPart(value="images", required = false) List<MultipartFile> images){
         String userId = customUserDetails.getMember().getUserId();
